@@ -30,14 +30,12 @@ const Home = () => {
       ],
     },
     {
-      title: 'Show Your Ad Here',
-      highlight: 'Prime Advertising Space',
-      description: 'Premium placement on our homepage. Contact us to feature your business in this coveted spot.',
-      image: 'https://images.unsplash.com/photo-1557838923-2985c318be48?w=1200',
-      buttons: [
-        { text: 'Contact Us', link: '/contact', primary: true },
-        { text: 'Learn More', link: '/advertise', primary: false },
-      ],
+      title: 'Keeping Your Operations Running With',
+      highlight: 'Expert Electrical Solutions',
+      description: 'Over 50 years\' combined experience, same-day delivery, reliable support that keeps operations moving.',
+      image: '/ads/factorpro-logo.jpg',
+      isAdvertisement: true,
+      buttons: [],
     },
   ];
 

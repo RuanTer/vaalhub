@@ -127,7 +127,8 @@ const Sharpeville = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-50 p-6 rounded-lg mb-6 sticky top-24">
+            <div className="sticky top-24 space-y-6">
+            <div className="bg-gray-50 p-6 rounded-lg">
               <h3 className="text-xl font-bold mb-4">Important Information</h3>
               <dl className="space-y-3 text-sm">
                 <div>
@@ -169,6 +170,7 @@ const Sharpeville = () => {
               <p className="text-sm text-blue-800">
                 Sharpeville is a site of profound historical significance. Visitors are encouraged to approach with respect and take time to reflect on the events that took place here.
               </p>
+            </div>
             </div>
           </div>
         </div>

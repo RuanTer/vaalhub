@@ -199,8 +199,9 @@ const Vereeniging = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-6">
             {/* Quick Facts */}
-            <div className="bg-gray-50 p-6 rounded-lg mb-6 sticky top-24">
+            <div className="bg-gray-50 p-6 rounded-lg">
               <h3 className="text-xl font-bold mb-4">Quick Facts</h3>
               <dl className="space-y-3 text-sm">
                 <div>
@@ -234,11 +235,16 @@ const Vereeniging = () => {
             </div>
 
             {/* Ad Space */}
-            <div className="bg-gray-100 p-6 rounded-lg text-center">
-              <p className="text-sm text-gray-500 mb-2">Advertisement</p>
-              <div className="bg-white h-64 flex items-center justify-center rounded">
-                <p className="text-gray-400">Ad Space 300x250</p>
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <p className="text-xs text-gray-400 text-center py-1 bg-gray-50">Advertisement</p>
+              <div className="p-4">
+                <img
+                  src="/ads/factorpro-logo.jpg"
+                  alt="FactorPro Industrial Solutions & Supplies"
+                  className="w-full h-auto"
+                />
               </div>
+            </div>
             </div>
           </div>
         </div>
