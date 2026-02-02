@@ -1,56 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useNewsletter } from '../../hooks/useNewsletter';
+import { TOWNS, TIMING } from '../../config/constants';
+import { LIMITS } from '../../config/constants';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [subscribeStatus, setSubscribeStatus] = useState('');
+  const { email, setEmail, status, subscribe, isSuccess, reset } = useNewsletter();
 
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Business', href: '#', comingSoon: true },
     { name: 'Events', href: '#', comingSoon: true },
-    { name: 'Towns', href: '/towns', submenu: [
-      { name: 'Vereeniging', href: '/towns/vereeniging' },
-      { name: 'Vanderbijlpark', href: '/towns/vanderbijlpark' },
-      { name: 'Meyerton', href: '/towns/meyerton' },
-      { name: 'Sharpeville', href: '/towns/sharpeville' },
-      { name: 'Sasolburg', href: '/towns/sasolburg' },
-    ]},
+    { name: 'Towns', href: '/towns', submenu: TOWNS.map(town => ({
+      name: town.name,
+      href: town.path,
+    }))},
     { name: 'Explore', href: '#', comingSoon: true },
   ];
 
-  const handleNewsletterSubmit = async (e) => {
-    e.preventDefault();
-    setSubscribeStatus('loading');
-
-    try {
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbxa5uQyRQCnKl0EZadMRepmIiufqh2CXWWGv68MDTFxgHsw5GTxoAyj-QkwvOmdl3I0Ag/exec';
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('timestamp', new Date().toISOString());
-      formData.append('type', 'newsletter');
-
-      const response = await fetch(scriptURL, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        setSubscribeStatus('success');
-        setEmail('');
-        setTimeout(() => {
-          setSubscribeStatus('');
-          setIsSubscribeModalOpen(false);
-        }, 2000);
-      } else {
-        setSubscribeStatus('error');
-      }
-    } catch (error) {
-      console.error('Newsletter subscription error:', error);
-      setSubscribeStatus('error');
+  // Auto-close modal on success
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        setIsSubscribeModalOpen(false);
+        reset();
+      }, TIMING.MODAL_AUTO_CLOSE);
+      return () => clearTimeout(timer);
     }
+  }, [isSuccess, reset]);
+
+  const handleModalClose = () => {
+    setIsSubscribeModalOpen(false);
+    reset();
   };
 
   return (
@@ -176,11 +159,7 @@ const Header = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
             <button
-              onClick={() => {
-                setIsSubscribeModalOpen(false);
-                setSubscribeStatus('');
-                setEmail('');
-              }}
+              onClick={handleModalClose}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +170,7 @@ const Header = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscribe to VaalHub</h2>
             <p className="text-gray-600 mb-6">Stay updated with the latest news, events, and stories from the Vaal Triangle.</p>
 
-            <form onSubmit={handleNewsletterSubmit}>
+            <form onSubmit={subscribe}>
               <div className="mb-4">
                 <label htmlFor="modal-email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
@@ -202,6 +181,7 @@ const Header = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  maxLength={LIMITS.EMAIL_MAX_LENGTH}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vaal-orange-500 focus:border-vaal-orange-500"
                   placeholder="your@email.com"
                 />
@@ -209,19 +189,19 @@ const Header = () => {
 
               <button
                 type="submit"
-                disabled={subscribeStatus === 'loading'}
-                className="w-full px-4 py-3 bg-vaal-orange-500 text-white rounded-md hover:bg-vaal-orange-600 transition-colors font-medium disabled:opacity-50"
+                disabled={status === 'loading'}
+                className="w-full px-4 py-3 bg-vaal-orange-500 text-white rounded-md hover:bg-vaal-orange-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {subscribeStatus === 'loading' ? 'Subscribing...' : 'Subscribe'}
+                {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
               </button>
 
-              {subscribeStatus === 'success' && (
+              {status === 'success' && (
                 <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
                   <p className="text-green-800 text-sm">Thank you for subscribing!</p>
                 </div>
               )}
 
-              {subscribeStatus === 'error' && (
+              {status === 'error' && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
                   <p className="text-red-800 text-sm">Something went wrong. Please try again.</p>
                 </div>

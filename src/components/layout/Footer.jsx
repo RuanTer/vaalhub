@@ -1,40 +1,10 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useNewsletter } from '../../hooks/useNewsletter';
+import { TOWNS, LIMITS } from '../../config/constants';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [email, setEmail] = useState('');
-  const [subscribeStatus, setSubscribeStatus] = useState('');
-
-  const handleNewsletterSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Replace with your Google Apps Script Web App URL
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbxa5uQyRQCnKl0EZadMRepmIiufqh2CXWWGv68MDTFxgHsw5GTxoAyj-QkwvOmdl3I0Ag/exec';
-
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('timestamp', new Date().toISOString());
-      formData.append('type', 'newsletter');
-
-      const response = await fetch(scriptURL, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        setSubscribeStatus('success');
-        setEmail('');
-        setTimeout(() => setSubscribeStatus(''), 3000);
-      } else {
-        setSubscribeStatus('error');
-      }
-    } catch (error) {
-      console.error('Error submitting newsletter:', error);
-      setSubscribeStatus('error');
-    }
-  };
+  const { email, setEmail, status, subscribe } = useNewsletter();
 
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -87,11 +57,13 @@ const Footer = () => {
           <div>
             <h3 className="text-white text-lg font-bold mb-4">Explore Towns</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/towns/vereeniging" className="hover:text-vaal-orange-400 transition-colors">Vereeniging</Link></li>
-              <li><Link to="/towns/vanderbijlpark" className="hover:text-vaal-orange-400 transition-colors">Vanderbijlpark</Link></li>
-              <li><Link to="/towns/meyerton" className="hover:text-vaal-orange-400 transition-colors">Meyerton</Link></li>
-              <li><Link to="/towns/sharpeville" className="hover:text-vaal-orange-400 transition-colors">Sharpeville</Link></li>
-              <li><Link to="/towns/sasolburg" className="hover:text-vaal-orange-400 transition-colors">Sasolburg</Link></li>
+              {TOWNS.map((town) => (
+                <li key={town.slug}>
+                  <Link to={town.path} className="hover:text-vaal-orange-400 transition-colors">
+                    {town.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -99,25 +71,27 @@ const Footer = () => {
           <div>
             <h3 className="text-white text-lg font-bold mb-4">Stay Updated</h3>
             <p className="text-sm mb-4">Get the latest news and events delivered to your inbox.</p>
-            <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+            <form onSubmit={subscribe} className="space-y-2">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
+                maxLength={LIMITS.EMAIL_MAX_LENGTH}
                 className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-vaal-orange-500"
               />
               <button
                 type="submit"
-                className="w-full px-4 py-2 bg-vaal-orange-500 text-white rounded-md hover:bg-vaal-orange-600 transition-colors font-medium"
+                disabled={status === 'loading'}
+                className="w-full px-4 py-2 bg-vaal-orange-500 text-white rounded-md hover:bg-vaal-orange-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Subscribe
+                {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
               </button>
-              {subscribeStatus === 'success' && (
+              {status === 'success' && (
                 <p className="text-sm text-green-400">Thank you for subscribing!</p>
               )}
-              {subscribeStatus === 'error' && (
+              {status === 'error' && (
                 <p className="text-sm text-red-400">Something went wrong. Please try again.</p>
               )}
             </form>

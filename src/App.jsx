@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout';
 // Pages
 import Home from './pages/Home';
 import Advertise from './pages/Advertise';
+import NotFound from './pages/NotFound';
 import Vereeniging from './pages/towns/Vereeniging';
 import Vanderbijlpark from './pages/towns/Vanderbijlpark';
 import Meyerton from './pages/towns/Meyerton';
@@ -39,6 +40,9 @@ function App() {
           <Route path="/submit-news" element={<Home />} />
           <Route path="/privacy" element={<Home />} />
           <Route path="/terms" element={<Home />} />
+
+          {/* 404 Not Found - Catch all unmatched routes */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
     </Router>

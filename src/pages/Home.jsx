@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ArticleCard from '../components/ui/ArticleCard';
+import { TIMING } from '../config/constants';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -111,19 +112,19 @@ const Home = () => {
     },
   ];
 
-  // Auto-advance carousel every 7 seconds
+  // Auto-advance carousel
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 7000);
+    }, TIMING.CAROUSEL_INTERVAL);
     return () => clearInterval(timer);
   }, []);
 
-  // Auto-rotate active box every 3 seconds
+  // Auto-rotate active box
   useEffect(() => {
     const boxTimer = setInterval(() => {
       setActiveBox((prev) => (prev + 1) % keyFocusAreas.length);
-    }, 3000);
+    }, TIMING.FEATURED_STORIES_INTERVAL);
     return () => clearInterval(boxTimer);
   }, []);
 

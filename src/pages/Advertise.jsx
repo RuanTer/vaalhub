@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
+import { LIMITS, VALIDATION, TIMING } from '../config/constants';
+import { executeRecaptcha } from '../utils/recaptcha';
 
 const Advertise = () => {
   const [formData, setFormData] = useState({
@@ -19,10 +22,17 @@ const Advertise = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitStatus('loading');
 
     try {
-      // Replace with your Google Apps Script Web App URL for advertising inquiries
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbxxjHeAHj69Ub95UZjU4pE3mtHDxdBOKWFO9_j832KeDC3bvVKgccrUcNq0mkAY4Gfnbg/exec';
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('advertising_form');
+
+      if (!recaptchaToken) {
+        setSubmitStatus('error');
+        setTimeout(() => setSubmitStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
+        return;
+      }
 
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
@@ -32,8 +42,9 @@ const Advertise = () => {
       formDataToSend.append('message', formData.message);
       formDataToSend.append('timestamp', new Date().toISOString());
       formDataToSend.append('type', 'advertising');
+      formDataToSend.append('recaptchaToken', recaptchaToken);
 
-      const response = await fetch(scriptURL, {
+      const response = await fetch(API_ENDPOINTS.ADVERTISING, {
         method: 'POST',
         body: formDataToSend,
       });
@@ -47,13 +58,15 @@ const Advertise = () => {
           businessName: '',
           message: '',
         });
-        setTimeout(() => setSubmitStatus(''), 5000);
+        setTimeout(() => setSubmitStatus(''), TIMING.SUCCESS_MESSAGE_DURATION * 1.5);
       } else {
         setSubmitStatus('error');
+        setTimeout(() => setSubmitStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
     }
   };
 
@@ -155,6 +168,8 @@ const Advertise = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
+                    minLength={LIMITS.NAME_MIN_LENGTH}
+                    maxLength={LIMITS.NAME_MAX_LENGTH}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vaal-orange-500"
                   />
                 </div>
@@ -170,6 +185,7 @@ const Advertise = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    maxLength={LIMITS.EMAIL_MAX_LENGTH}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vaal-orange-500"
                   />
                 </div>
@@ -185,6 +201,9 @@ const Advertise = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     required
+                    pattern={VALIDATION.PHONE_PATTERN}
+                    maxLength={LIMITS.PHONE_MAX_LENGTH}
+                    title={VALIDATION.PHONE_TITLE}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vaal-orange-500"
                   />
                 </div>
@@ -200,6 +219,8 @@ const Advertise = () => {
                     value={formData.businessName}
                     onChange={handleChange}
                     required
+                    minLength={LIMITS.BUSINESS_NAME_MIN_LENGTH}
+                    maxLength={LIMITS.BUSINESS_NAME_MAX_LENGTH}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vaal-orange-500"
                   />
                 </div>
@@ -214,15 +235,20 @@ const Advertise = () => {
                     value={formData.message}
                     onChange={handleChange}
                     rows="4"
+                    maxLength={LIMITS.MESSAGE_MAX_LENGTH}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vaal-orange-500"
                   ></textarea>
+                  <div className="text-sm text-gray-500 text-right mt-1">
+                    {formData.message.length}/{LIMITS.MESSAGE_MAX_LENGTH} characters
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-vaal-orange-500 text-white rounded-md hover:bg-vaal-orange-600 transition-colors font-medium"
+                  disabled={submitStatus === 'loading'}
+                  className="w-full px-6 py-3 bg-vaal-orange-500 text-white rounded-md hover:bg-vaal-orange-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit Inquiry
+                  {submitStatus === 'loading' ? 'Submitting...' : 'Submit Inquiry'}
                 </button>
 
                 {submitStatus === 'success' && (

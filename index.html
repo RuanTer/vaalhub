@@ -16,12 +16,27 @@
     <meta name="keywords" content="Vaal Triangle, Vereeniging, Vanderbijlpark, Meyerton, local news, events, businesses, Vaal River, Sharpeville, Sasolburg">
 
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA_MEASUREMENT_ID"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VQZFG8PNVG"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-VQZFG8PNVG');
+    </script>
+
+    <!-- reCAPTCHA v3 -->
+    <script>
+      // Load reCAPTCHA script dynamically to avoid blocking
+      (function() {
+        var siteKey = 'YOUR_RECAPTCHA_SITE_KEY_HERE';
+        if (siteKey && siteKey !== 'YOUR_RECAPTCHA_SITE_KEY_HERE') {
+          var script = document.createElement('script');
+          script.src = 'https://www.google.com/recaptcha/api.js?render=' + siteKey;
+          script.async = true;
+          script.defer = true;
+          document.head.appendChild(script);
+        }
+      })();
     </script>
 
     <title>VaalHub - Local News, Events & Business | Vaal Triangle</title>
