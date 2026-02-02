@@ -27,6 +27,20 @@ const Sasolburg = () => {
         </div>
       </div>
 
+      {/* Mobile Advertisement - Shows after hero on mobile only */}
+      <div className="lg:hidden max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <p className="text-xs text-gray-400 text-center py-1 bg-gray-50">Advertisement</p>
+          <div className="p-4">
+            <img
+              src="/ads/factorpro-logo.jpg"
+              alt="FactorPro Industrial Solutions & Supplies"
+              className="w-full h-auto"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

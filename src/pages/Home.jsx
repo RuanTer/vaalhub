@@ -146,32 +146,9 @@ const Home = () => {
     <div>
       {/* Hero Carousel Section */}
       <section className="relative bg-white overflow-hidden">
-        <div className="relative h-[600px] flex">
-          {/* Left Side - Content (1/3) */}
-          <div className="w-full lg:w-1/3 bg-white flex items-center px-8 md:px-12 lg:px-16">
-            <div className="w-full">
-              {heroSlides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`transition-opacity duration-1000 ${
-                    index === currentSlide ? 'opacity-100' : 'opacity-0 absolute'
-                  }`}
-                >
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
-                    {slide.title}
-                    <br />
-                    <span className="text-vaal-orange-500">{slide.highlight}</span>
-                  </h1>
-                  <p className="text-lg md:text-xl text-gray-700">
-                    {slide.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Side - Images (2/3) */}
-          <div className="hidden lg:block lg:w-2/3 relative overflow-hidden">
+        <div className="relative h-[500px] md:h-[600px] flex flex-col lg:flex-row">
+          {/* Background Images - Full width on mobile, right side on desktop */}
+          <div className="absolute inset-0 lg:relative lg:w-2/3 overflow-hidden">
             {heroSlides.map((slide, index) => (
               <div
                 key={index}
@@ -184,11 +161,14 @@ const Home = () => {
                   style={{
                     backgroundImage: `url(${slide.image})`,
                   }}
-                ></div>
+                >
+                  {/* Dark overlay on mobile for text readability */}
+                  <div className="absolute inset-0 bg-black/40 lg:hidden"></div>
+                </div>
               </div>
             ))}
 
-            {/* Dots Indicator */}
+            {/* Dots Indicator - visible on all screens */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
               {heroSlides.map((_, index) => (
                 <button
@@ -198,6 +178,29 @@ const Home = () => {
                     index === currentSlide ? 'bg-white w-8' : 'bg-white/50'
                   }`}
                 />
+              ))}
+            </div>
+          </div>
+
+          {/* Content - Overlay on mobile, left side on desktop */}
+          <div className="relative lg:absolute lg:left-0 lg:top-0 lg:w-1/3 lg:h-full lg:bg-white flex items-center px-8 md:px-12 lg:px-16 z-10">
+            <div className="w-full">
+              {heroSlides.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`transition-opacity duration-1000 ${
+                    index === currentSlide ? 'opacity-100' : 'opacity-0 absolute'
+                  }`}
+                >
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white lg:text-gray-900">
+                    {slide.title}
+                    <br />
+                    <span className="text-vaal-orange-400 lg:text-vaal-orange-500">{slide.highlight}</span>
+                  </h1>
+                  <p className="text-lg md:text-xl text-white lg:text-gray-700">
+                    {slide.description}
+                  </p>
+                </div>
               ))}
             </div>
           </div>
