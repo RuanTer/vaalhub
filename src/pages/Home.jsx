@@ -146,62 +146,107 @@ const Home = () => {
     <div>
       {/* Hero Carousel Section */}
       <section className="relative bg-white overflow-hidden">
-        <div className="relative h-[500px] md:h-[600px] flex flex-col lg:flex-row">
-          {/* Background Images - Full width on mobile, right side on desktop */}
-          <div className="absolute inset-0 lg:relative lg:w-2/3 overflow-hidden">
-            {heroSlides.map((slide, index) => (
-              <div
-                key={index}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === currentSlide ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <div
-                  className="w-full h-full bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url(${slide.image})`,
-                  }}
-                >
-                  {/* Dark overlay on mobile for text readability */}
-                  <div className="absolute inset-0 bg-black/40 lg:hidden"></div>
+        {/* Mobile Layout - Image on top, text below */}
+        <div className="lg:hidden">
+          {heroSlides.map((slide, index) => (
+            <div
+              key={index}
+              className={`transition-opacity duration-1000 ${
+                index === currentSlide ? 'opacity-100' : 'opacity-0 absolute inset-0'
+              }`}
+            >
+              {/* Image Section - Fixed height */}
+              <div className="relative h-64 overflow-hidden">
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Text Section - White background */}
+              <div className="bg-white px-6 py-8">
+                <h1 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                  {slide.title}
+                  <br />
+                  <span className="text-vaal-orange-500">{slide.highlight}</span>
+                </h1>
+                <p className="text-base md:text-lg text-gray-700 mb-6">
+                  {slide.description}
+                </p>
+
+                {/* Dots Indicator */}
+                <div className="flex space-x-2 justify-center">
+                  {heroSlides.map((_, dotIndex) => (
+                    <button
+                      key={dotIndex}
+                      onClick={() => setCurrentSlide(dotIndex)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        dotIndex === currentSlide ? 'bg-vaal-orange-500 w-6' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
-            ))}
-
-            {/* Dots Indicator - visible on all screens */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-              {heroSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index === currentSlide ? 'bg-white w-8' : 'bg-white/50'
-                  }`}
-                />
-              ))}
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Content - Overlay on mobile, left side on desktop */}
-          <div className="relative lg:absolute lg:left-0 lg:top-0 lg:w-1/3 lg:h-full lg:bg-white flex items-center px-8 md:px-12 lg:px-16 z-10">
-            <div className="w-full">
+        {/* Desktop Layout - Side by side */}
+        <div className="hidden lg:block relative h-[600px]">
+          <div className="flex h-full">
+            {/* Left Side - Content (1/3) */}
+            <div className="w-1/3 bg-white flex items-center px-12 lg:px-16 z-10">
+              <div className="w-full">
+                {heroSlides.map((slide, index) => (
+                  <div
+                    key={index}
+                    className={`transition-opacity duration-1000 ${
+                      index === currentSlide ? 'opacity-100' : 'opacity-0 absolute'
+                    }`}
+                  >
+                    <h1 className="text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
+                      {slide.title}
+                      <br />
+                      <span className="text-vaal-orange-500">{slide.highlight}</span>
+                    </h1>
+                    <p className="text-lg lg:text-xl text-gray-700">
+                      {slide.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Side - Images (2/3) */}
+            <div className="w-2/3 relative overflow-hidden">
               {heroSlides.map((slide, index) => (
                 <div
                   key={index}
-                  className={`transition-opacity duration-1000 ${
-                    index === currentSlide ? 'opacity-100' : 'opacity-0 absolute'
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentSlide ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white lg:text-gray-900">
-                    {slide.title}
-                    <br />
-                    <span className="text-vaal-orange-400 lg:text-vaal-orange-500">{slide.highlight}</span>
-                  </h1>
-                  <p className="text-lg md:text-xl text-white lg:text-gray-700">
-                    {slide.description}
-                  </p>
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ))}
+
+              {/* Dots Indicator */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+                {heroSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      index === currentSlide ? 'bg-white w-8' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>

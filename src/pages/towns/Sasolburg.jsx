@@ -29,13 +29,13 @@ const Sasolburg = () => {
 
       {/* Mobile Advertisement - Shows after hero on mobile only */}
       <div className="lg:hidden max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden max-w-md mx-auto">
           <p className="text-xs text-gray-400 text-center py-1 bg-gray-50">Advertisement</p>
-          <div className="p-4">
+          <div className="p-3">
             <img
               src="/ads/factorpro-logo.jpg"
               alt="FactorPro Industrial Solutions & Supplies"
-              className="w-full h-auto"
+              className="w-full h-auto max-h-32 object-contain"
             />
           </div>
         </div>
@@ -200,13 +200,13 @@ const Sasolburg = () => {
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden max-w-md mx-auto">
               <p className="text-xs text-gray-400 text-center py-1 bg-gray-50">Advertisement</p>
-              <div className="p-4">
+              <div className="p-3">
                 <img
                   src="/ads/factorpro-logo.jpg"
                   alt="FactorPro Industrial Solutions & Supplies"
-                  className="w-full h-auto"
+                  className="w-full h-auto max-h-32 object-contain"
                 />
               </div>
             </div>
