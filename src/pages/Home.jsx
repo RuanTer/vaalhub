@@ -352,14 +352,16 @@ const Home = () => {
           </div>
 
           <div
-            className="relative overflow-hidden"
+            className="relative overflow-hidden touch-pan-y"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
             <div
-              className="flex transition-transform duration-300 ease-out"
-              style={{ transform: `translateX(-${currentArticleSlide * (100 / 3)}%)` }}
+              className="flex transition-transform duration-200 ease-out will-change-transform"
+              style={{
+                transform: `translate3d(-${currentArticleSlide * 100}%, 0, 0)`,
+              }}
             >
               {featuredArticles.map((article) => (
                 <div key={article.id} className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-4">
