@@ -36,14 +36,19 @@ export const useNewsletter = () => {
       const response = await fetch(API_ENDPOINTS.NEWSLETTER, {
         method: 'POST',
         body: formData,
-        mode: 'no-cors',
       });
 
-      // With no-cors mode, we get an opaque response and can't check .ok
-      // If fetch succeeds without error, assume success
-      setStatus('success');
-      setEmail('');
-      setTimeout(() => setStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setStatus('success');
+        setEmail('');
+        setTimeout(() => setStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
+      } else {
+        console.error('Server response:', data);
+        setStatus('error');
+        setTimeout(() => setStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
+      }
     } catch (error) {
       console.error('Newsletter subscription error:', error);
       setStatus('error');

@@ -7,6 +7,8 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeBox, setActiveBox] = useState(0);
   const [currentArticleSlide, setCurrentArticleSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   const heroSlides = [
     {
@@ -144,6 +146,33 @@ const Home = () => {
 
   const prevArticleSlide = () => {
     setCurrentArticleSlide((prev) => (prev - 1 + featuredArticles.length) % featuredArticles.length);
+  };
+
+  // Handle touch events for swipe gestures on article carousel
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextArticleSlide();
+    }
+    if (isRightSwipe) {
+      prevArticleSlide();
+    }
+
+    setTouchStart(0);
+    setTouchEnd(0);
   };
 
   return (
@@ -322,9 +351,14 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="relative overflow-hidden">
+          <div
+            className="relative overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
-              className="flex transition-transform duration-500 ease-in-out"
+              className="flex transition-transform duration-300 ease-out"
               style={{ transform: `translateX(-${currentArticleSlide * (100 / 3)}%)` }}
             >
               {featuredArticles.map((article) => (
@@ -346,16 +380,10 @@ const Home = () => {
           <p className="text-xl mb-8 max-w-2xl mx-auto">
             Join us in celebrating and supporting the vibrant communities across the Vaal Triangle
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/submit-news"
-              className="px-8 py-3 bg-white text-vaal-orange-600 rounded-md hover:bg-gray-100 transition-colors font-medium"
-            >
-              Submit Your Story
-            </Link>
+          <div className="flex justify-center">
             <Link
               to="/advertise"
-              className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-md hover:bg-white hover:text-vaal-orange-600 transition-colors font-medium"
+              className="px-8 py-3 bg-white text-vaal-orange-600 rounded-md hover:bg-gray-100 transition-colors font-medium"
             >
               Advertise With Us
             </Link>

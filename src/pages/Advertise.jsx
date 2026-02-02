@@ -45,20 +45,25 @@ const Advertise = () => {
       const response = await fetch(API_ENDPOINTS.ADVERTISING, {
         method: 'POST',
         body: formDataToSend,
-        mode: 'no-cors',
       });
 
-      // With no-cors mode, we get an opaque response and can't check .ok
-      // If fetch succeeds without error, assume success
-      setSubmitStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        businessName: '',
-        message: '',
-      });
-      setTimeout(() => setSubmitStatus(''), TIMING.SUCCESS_MESSAGE_DURATION * 1.5);
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSubmitStatus('success');
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          businessName: '',
+          message: '',
+        });
+        setTimeout(() => setSubmitStatus(''), TIMING.SUCCESS_MESSAGE_DURATION * 1.5);
+      } else {
+        console.error('Server response:', data);
+        setSubmitStatus('error');
+        setTimeout(() => setSubmitStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
+      }
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus('error');
