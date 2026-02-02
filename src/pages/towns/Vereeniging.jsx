@@ -48,7 +48,7 @@ const Vereeniging = () => {
           <div className="lg:col-span-2">
             <div className="article-content prose prose-lg max-w-none">
               {/* Introduction */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Introduction</h2>
                 <p>
                   Vereeniging is often described as the historical heart of the Vaal Triangle. Positioned along the banks of the Vaal River, it is one of the region's oldest towns and has played a central role in South Africa's industrial, political, and social development. Today, Vereeniging blends established suburbs, active commercial zones, cultural landmarks, and river-based leisure, making it both a working town and a lifestyle destination.
@@ -59,7 +59,7 @@ const Vereeniging = () => {
               </section>
 
               {/* History */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">A Brief History of Vereeniging</h2>
                 <p>
                   Founded in the late 1800s, Vereeniging developed rapidly due to its access to coal, water, and railway infrastructure. These factors made it a strategic industrial centre, particularly for iron and steel production.
@@ -92,7 +92,7 @@ const Vereeniging = () => {
               </section>
 
               {/* Things to Do */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Things to Do in Vereeniging</h2>
 
                 <h3 className="text-2xl font-bold mb-4">River & Outdoor Activities</h3>
@@ -125,7 +125,7 @@ const Vereeniging = () => {
               </section>
 
               {/* Food & Restaurants */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Food & Restaurants in Vereeniging</h2>
                 <p>
                   Vereeniging's dining scene is concentrated largely in the Three Rivers area, which is known for its variety of sit-down restaurants.
@@ -143,7 +143,7 @@ const Vereeniging = () => {
               </section>
 
               {/* Shopping */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Shopping & Retail</h2>
                 <ul>
                   <li><strong>River Square Mall:</strong> Central shopping destination with national retailers</li>
@@ -169,7 +169,7 @@ const Vereeniging = () => {
               </section>
 
               {/* Living */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Living in Vereeniging</h2>
 
                 <h3 className="text-2xl font-bold mb-4">Residential Areas</h3>
@@ -199,7 +199,7 @@ const Vereeniging = () => {
               </section>
 
               {/* Conclusion */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Why Vereeniging Matters</h2>
                 <p>
                   Vereeniging is more than a commuter town. It is a foundational part of the Vaal Triangle's identity — historically significant, economically active, and community-driven.

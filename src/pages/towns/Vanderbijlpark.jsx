@@ -48,7 +48,7 @@ const Vanderbijlpark = () => {
           <div className="lg:col-span-2">
             <div className="article-content prose prose-lg max-w-none">
               {/* Introduction */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Introduction</h2>
                 <p>
                   Vanderbijlpark is the planned industrial and residential centre of the Vaal Triangle. Designed in the mid-20th century as a modern town to support South Africa's growing steel industry, it is known for its wide roads, organised suburbs, strong educational institutions, and proximity to the Vaal River.
@@ -59,7 +59,7 @@ const Vanderbijlpark = () => {
               </section>
 
               {/* History */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">A Brief History of Vanderbijlpark</h2>
                 <p>
                   Vanderbijlpark was established in the 1940s as a purpose-built town to support ISCOR (now ArcelorMittal South Africa). Unlike older towns that developed organically, Vanderbijlpark was carefully planned with residential zones, industrial areas, schools, and green spaces.
@@ -86,7 +86,7 @@ const Vanderbijlpark = () => {
               </section>
 
               {/* Things to Do */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Things to Do in Vanderbijlpark</h2>
 
                 <h3 className="text-2xl font-bold mb-4">River & Outdoor Lifestyle</h3>
@@ -116,7 +116,7 @@ const Vanderbijlpark = () => {
               </section>
 
               {/* Food & Restaurants */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Food, Drink & Social Spots</h2>
                 <p>
                   Vanderbijlpark offers a mix of family restaurants, fast-casual dining, and coffee shops, particularly around the Vaal Mall and CBD areas.
@@ -132,7 +132,7 @@ const Vanderbijlpark = () => {
               </section>
 
               {/* Shopping */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Shopping & Retail</h2>
                 <ul>
                   <li><strong>Vaal Mall:</strong> Regional retail hub serving the entire Vaal Triangle</li>
@@ -156,7 +156,7 @@ const Vanderbijlpark = () => {
               </section>
 
               {/* Education */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Education & Institutions</h2>
                 <p>Vanderbijlpark is home to major educational facilities, including:</p>
                 <ul>
@@ -168,7 +168,7 @@ const Vanderbijlpark = () => {
               </section>
 
               {/* Living */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Living in Vanderbijlpark</h2>
 
                 <h3 className="text-2xl font-bold mb-4">Residential Areas</h3>
@@ -190,7 +190,7 @@ const Vanderbijlpark = () => {
               </section>
 
               {/* Conclusion */}
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Why Vanderbijlpark Matters</h2>
                 <p>
                   Vanderbijlpark represents the industrial backbone of the Vaal Triangle while continuing to evolve as a residential and commercial centre.

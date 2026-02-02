@@ -47,14 +47,14 @@ const Sasolburg = () => {
           {/* Main Article Content */}
           <div className="lg:col-span-2">
             <div className="article-content prose prose-lg max-w-none">
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Overview</h2>
                 <p>
                   Sasolburg is a planned industrial town developed around the Sasol chemical plants. Although located in the Free State, it is economically and socially integrated into the Vaal Triangle.
                 </p>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Historical Background</h2>
                 <p>
                   Established in the 1950s, Sasolburg was built to support the country's synthetic fuel and chemical industries. Its planning prioritised infrastructure, residential comfort, and business efficiency.
@@ -79,7 +79,7 @@ const Sasolburg = () => {
                 </p>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Things to Do in Sasolburg</h2>
                 <h3 className="text-2xl font-bold mb-4">Riverfront Leisure</h3>
                 <p>The Vaal River provides numerous recreational opportunities:</p>
@@ -108,7 +108,7 @@ const Sasolburg = () => {
                 </ul>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Restaurants & Dining</h2>
                 <p>Sasolburg offers a range of dining options:</p>
                 <ul>
@@ -130,7 +130,7 @@ const Sasolburg = () => {
                 </ul>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Living in Sasolburg</h2>
                 <p>Residents of Sasolburg benefit from:</p>
                 <ul>
@@ -148,7 +148,7 @@ const Sasolburg = () => {
                 </ul>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Why Sasolburg Matters</h2>
                 <p>
                   Sasolburg represents a significant part of South Africa's industrial heritage and economic strength. As a planned industrial town, it demonstrates the relationship between industry, community, and regional development.

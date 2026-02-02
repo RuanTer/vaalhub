@@ -18,6 +18,16 @@ const Home = () => {
         { text: 'Explore the Vaal', link: '/explore', primary: true },
         { text: 'Local Businesses', link: '/business', primary: false },
       ],
+      duration: 3000, // 3 seconds
+    },
+    {
+      title: 'Keeping Your Operations Running With',
+      highlight: 'Expert Electrical Solutions',
+      description: 'Over 50 years\' combined experience, same-day delivery, reliable support that keeps operations moving.',
+      image: '/ads/factorpro-logo.jpg',
+      isAdvertisement: true,
+      buttons: [],
+      duration: 7000, // 7 seconds
     },
     {
       title: 'Advertise Your Business',
@@ -28,14 +38,7 @@ const Home = () => {
         { text: 'Get Started', link: '/advertise', primary: true },
         { text: 'View Packages', link: '/advertise', primary: false },
       ],
-    },
-    {
-      title: 'Keeping Your Operations Running With',
-      highlight: 'Expert Electrical Solutions',
-      description: 'Over 50 years\' combined experience, same-day delivery, reliable support that keeps operations moving.',
-      image: '/ads/factorpro-logo.jpg',
-      isAdvertisement: true,
-      buttons: [],
+      duration: 4000, // 4 seconds
     },
   ];
 
@@ -110,13 +113,14 @@ const Home = () => {
     },
   ];
 
-  // Auto-advance carousel
+  // Auto-advance carousel with variable timing
   useEffect(() => {
-    const timer = setInterval(() => {
+    const currentDuration = heroSlides[currentSlide]?.duration || TIMING.CAROUSEL_INTERVAL;
+    const timer = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, TIMING.CAROUSEL_INTERVAL);
-    return () => clearInterval(timer);
-  }, []);
+    }, currentDuration);
+    return () => clearTimeout(timer);
+  }, [currentSlide]);
 
   // Auto-rotate active box
   useEffect(() => {
@@ -156,11 +160,11 @@ const Home = () => {
               }`}
             >
               {/* Image Section - Fixed height */}
-              <div className="relative h-64 overflow-hidden">
+              <div className="relative h-64 overflow-hidden bg-gray-100 flex items-center justify-center">
                 <img
                   src={slide.image}
                   alt={slide.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
 

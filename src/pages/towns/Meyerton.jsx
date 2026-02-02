@@ -47,14 +47,14 @@ const Meyerton = () => {
           {/* Main Article Content */}
           <div className="lg:col-span-2">
             <div className="article-content prose prose-lg max-w-none">
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Introduction</h2>
                 <p>
                   Meyerton offers a quieter, more small-town alternative within the Vaal Triangle. Located south of Vereeniging, it is known for its relaxed pace of life, agricultural surroundings, and steadily growing residential developments. Over the years, Meyerton has become attractive to families, retirees, and entrepreneurs looking for space, affordability, and a strong sense of community.
                 </p>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">A Brief History of Meyerton</h2>
                 <p>
                   Meyerton was established in the late 19th century and developed primarily as an agricultural service town. Its growth was supported by farming activity, railway connections, and its proximity to Vereeniging.
@@ -82,7 +82,7 @@ const Meyerton = () => {
                 </p>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Things to Do in Meyerton</h2>
                 <h3 className="text-2xl font-bold mb-4">Outdoor & Nature Activities</h3>
                 <p>Meyerton is surrounded by open land, smallholdings, and natural areas, offering:</p>
@@ -102,7 +102,7 @@ const Meyerton = () => {
                 </ul>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Food, Coffee & Local Spots</h2>
                 <p>Meyerton's food scene is smaller than Vereeniging or Vanderbijlpark but growing steadily.</p>
                 <p>Local offerings include:</p>
@@ -127,7 +127,7 @@ const Meyerton = () => {
                 <p>In recent years, new residential developments and estates have brought increased demand for services, retail, and professional businesses.</p>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Living in Meyerton</h2>
                 <h3 className="text-2xl font-bold mb-4">Residential Areas</h3>
                 <p>Meyerton offers a mix of:</p>
@@ -149,7 +149,7 @@ const Meyerton = () => {
                 </ul>
               </section>
 
-              <section className="mb-12">
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border-l-4 border-vaal-orange-500">
                 <h2 className="text-3xl font-bold mb-6">Why Meyerton Matters</h2>
                 <p>
                   Meyerton plays an important balancing role in the Vaal Triangle. It offers space, affordability, and a slower lifestyle while remaining closely connected to larger economic hubs.
