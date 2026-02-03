@@ -22,7 +22,7 @@ export const LIMITS = {
 };
 
 export const VALIDATION = {
-  PHONE_PATTERN: '[0-9\s\-\+\(\)]{10,20}',
+  PHONE_PATTERN: '[0-9\\s\\-\\+\\(\\)]{10,20}',
   PHONE_TITLE: 'Please enter a valid phone number (10-20 digits)',
 };
 
