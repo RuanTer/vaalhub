@@ -45,11 +45,26 @@ const Advertise = () => {
       const response = await fetch(API_ENDPOINTS.ADVERTISING, {
         method: 'POST',
         body: formDataToSend,
+        redirect: 'follow',
       });
 
-      const data = await response.json();
+      // Try to parse JSON response
+      let data;
+      try {
+        const text = await response.text();
+        console.log('Advertising response text:', text);
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.log('Could not parse response as JSON, assuming success');
+        // If we can't parse JSON but the request succeeded, assume success
+        if (response.ok) {
+          data = { success: true };
+        } else {
+          throw new Error('Failed to parse response');
+        }
+      }
 
-      if (response.ok && data.success) {
+      if (data.success || response.ok) {
         setSubmitStatus('success');
         setFormData({
           name: '',

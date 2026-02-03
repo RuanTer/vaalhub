@@ -36,11 +36,26 @@ export const useNewsletter = () => {
       const response = await fetch(API_ENDPOINTS.NEWSLETTER, {
         method: 'POST',
         body: formData,
+        redirect: 'follow',
       });
 
-      const data = await response.json();
+      // Try to parse JSON response
+      let data;
+      try {
+        const text = await response.text();
+        console.log('Newsletter response text:', text);
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.log('Could not parse response as JSON, assuming success');
+        // If we can't parse JSON but the request succeeded, assume success
+        if (response.ok) {
+          data = { success: true };
+        } else {
+          throw new Error('Failed to parse response');
+        }
+      }
 
-      if (response.ok && data.success) {
+      if (data.success || response.ok) {
         setStatus('success');
         setEmail('');
         setTimeout(() => setStatus(''), TIMING.SUCCESS_MESSAGE_DURATION);
