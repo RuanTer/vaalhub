@@ -4,8 +4,8 @@
  */
 
 export const API_ENDPOINTS = {
-  NEWSLETTER: import.meta.env.VITE_NEWSLETTER_API_URL || 'https://script.google.com/macros/s/AKfycbxa5uQyRQCnKl0EZadMRepmIiufqh2CXWWGv68MDTFxgHsw5GTxoAyj-QkwvOmdl3I0Ag/exec',
-  ADVERTISING: import.meta.env.VITE_ADVERTISING_API_URL || 'https://script.google.com/macros/s/AKfycbxxjHeAHj69Ub95UZjU4pE3mtHDxdBOKWFO9_j832KeDC3bvVKgccrUcNq0mkAY4Gfnbg/exec',
+  NEWSLETTER: import.meta.env.VITE_NEWSLETTER_API_URL || 'https://script.google.com/macros/s/AKfycbxAx8SoH9siD70oNbQj2k7gT6LwsdcS_uQNuTbEHp9n8ysSTNRBcdis5dayFwectkzQYw/exec',
+  ADVERTISING: import.meta.env.VITE_ADVERTISING_API_URL || 'https://script.google.com/macros/s/AKfycbxAx8SoH9siD70oNbQj2k7gT6LwsdcS_uQNuTbEHp9n8ysSTNRBcdis5dayFwectkzQYw/exec',
 };
 
 // Log API endpoints for debugging
