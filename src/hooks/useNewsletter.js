@@ -21,21 +21,24 @@ export const useNewsletter = () => {
       // Get reCAPTCHA token (optional - don't block submission if it fails)
       const recaptchaToken = await executeRecaptcha('newsletter');
 
-      // Prepare form data
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('timestamp', new Date().toISOString());
-      formData.append('type', 'newsletter');
+      // Prepare form data as URL-encoded string for Google Apps Script
+      const params = new URLSearchParams();
+      params.append('email', email);
+      params.append('timestamp', new Date().toISOString());
+      params.append('type', 'newsletter');
 
       // Only add reCAPTCHA token if available
       if (recaptchaToken && recaptchaToken !== 'dev_mode_no_recaptcha') {
-        formData.append('recaptchaToken', recaptchaToken);
+        params.append('recaptchaToken', recaptchaToken);
       }
 
       // Submit to Google Apps Script
       const response = await fetch(API_ENDPOINTS.NEWSLETTER, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
         redirect: 'follow',
       });
 

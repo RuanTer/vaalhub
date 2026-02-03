@@ -28,23 +28,27 @@ const Advertise = () => {
       // Get reCAPTCHA token (optional - don't block submission if it fails)
       const recaptchaToken = await executeRecaptcha('advertising_form');
 
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
-      formDataToSend.append('businessName', formData.businessName);
-      formDataToSend.append('message', formData.message);
-      formDataToSend.append('timestamp', new Date().toISOString());
-      formDataToSend.append('type', 'advertising');
+      // Prepare form data as URL-encoded string for Google Apps Script
+      const params = new URLSearchParams();
+      params.append('name', formData.name);
+      params.append('email', formData.email);
+      params.append('phone', formData.phone);
+      params.append('businessName', formData.businessName);
+      params.append('message', formData.message);
+      params.append('timestamp', new Date().toISOString());
+      params.append('type', 'advertising');
 
       // Only add reCAPTCHA token if available
       if (recaptchaToken && recaptchaToken !== 'dev_mode_no_recaptcha') {
-        formDataToSend.append('recaptchaToken', recaptchaToken);
+        params.append('recaptchaToken', recaptchaToken);
       }
 
       const response = await fetch(API_ENDPOINTS.ADVERTISING, {
         method: 'POST',
-        body: formDataToSend,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
         redirect: 'follow',
       });
 
