@@ -4,6 +4,10 @@ import Layout from './components/layout/Layout';
 // Pages
 import Home from './pages/Home';
 import Advertise from './pages/Advertise';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Subscribe from './pages/Subscribe';
+import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 import Vereeniging from './pages/towns/Vereeniging';
 import Vanderbijlpark from './pages/towns/Vanderbijlpark';
@@ -35,11 +39,12 @@ function App() {
           <Route path="/business" element={<Home />} />
           <Route path="/living" element={<Home />} />
           <Route path="/about" element={<Home />} />
-          <Route path="/contact" element={<Home />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/advertise" element={<Advertise />} />
+          <Route path="/subscribe" element={<Subscribe />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/submit-news" element={<Home />} />
-          <Route path="/privacy" element={<Home />} />
-          <Route path="/terms" element={<Home />} />
 
           {/* 404 Not Found - Catch all unmatched routes */}
           <Route path="*" element={<NotFound />} />

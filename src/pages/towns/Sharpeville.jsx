@@ -179,11 +179,16 @@ const Sharpeville = () => {
               </div>
             </div>
 
-            <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-              <h4 className="font-bold text-blue-900 mb-2">Respectful Tourism</h4>
-              <p className="text-sm text-blue-800">
-                Sharpeville is a site of profound historical significance. Visitors are encouraged to approach with respect and take time to reflect on the events that took place here.
-              </p>
+            {/* Ad Space */}
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <p className="text-xs text-gray-400 text-center py-1 bg-gray-50">Advertisement</p>
+              <div className="p-4">
+                <img
+                  src="/ads/factorpro-logo.jpg"
+                  alt="FactorPro Industrial Solutions & Supplies"
+                  className="w-full h-auto"
+                />
+              </div>
             </div>
             </div>
           </div>
