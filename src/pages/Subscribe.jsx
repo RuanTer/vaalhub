@@ -13,9 +13,6 @@ const Subscribe = () => {
       {/* Hero Banner */}
       <div className="bg-gray-900 text-white py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex justify-center mb-4">
-            <img src="/vh-logo.svg" alt="VaalHub" className="h-16 w-16 rounded-xl" />
-          </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Stay in the Loop</h1>
           <p className="text-gray-400 text-lg max-w-xl mx-auto">
             Get the latest local news, events, and stories from the Vaal Triangle delivered straight to your inbox.

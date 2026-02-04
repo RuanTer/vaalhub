@@ -65,8 +65,7 @@ const Header = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src="/vh-logo.svg" alt="VaalHub" className="h-10 w-10 rounded-lg" />
-            <div className="text-3xl font-bold font-serif ml-2">
+            <div className="text-3xl font-bold font-serif">
               <span className="text-gray-900">Vaal</span>
               <span className="text-vaal-orange-500">Hub</span>
             </div>

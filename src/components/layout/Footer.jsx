@@ -12,13 +12,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About Section */}
           <div>
-            <div className="flex items-center mb-4">
-              <img src="/vh-logo.svg" alt="VaalHub" className="h-8 w-8 rounded-md mr-2" />
-              <h3 className="text-white text-lg font-bold">
-                <span className="text-white">Vaal</span>
-                <span className="text-vaal-orange-500">Hub</span>
-              </h3>
-            </div>
+            <h3 className="text-white text-lg font-bold mb-4">
+              <span className="text-white">Vaal</span>
+              <span className="text-vaal-orange-500">Hub</span>
+            </h3>
             <p className="text-sm mb-4">
               Your trusted source for local news, events, and business information across the Vaal Triangle.
             </p>

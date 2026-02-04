@@ -8,10 +8,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vaalhub.co.za/" />
+    <meta property="og:title" content="VaalHub - Local News, Events & Business | Vaal Triangle" />
+    <meta property="og:description" content="VaalHub is your trusted source for local news, events, and business information across the Vaal Triangle. Discover Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, and Sasolburg." />
     <meta property="og:image" content="https://vaalhub.co.za/vh-logo.svg" />
     <meta property="og:image:type" content="image/svg+xml" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
+    <meta property="og:site_name" content="VaalHub" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="VaalHub - Local News, Events & Business | Vaal Triangle" />
+    <meta name="twitter:description" content="VaalHub is your trusted source for local news, events, and business information across the Vaal Triangle." />
+    <meta name="twitter:image" content="https://vaalhub.co.za/vh-logo.svg" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,6 +62,24 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Fallback for search crawlers that do not execute JavaScript -->
+    <noscript>
+      <h1>VaalHub – Local News, Events &amp; Business</h1>
+      <p>Your trusted source for local news, events, and business information across the Vaal Triangle, South Africa.</p>
+      <p>Discover the towns of Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, and Sasolburg.</p>
+      <ul>
+        <li><a href="/towns/vereeniging">Vereeniging</a></li>
+        <li><a href="/towns/vanderbijlpark">Vanderbijlpark</a></li>
+        <li><a href="/towns/meyerton">Meyerton</a></li>
+        <li><a href="/towns/sharpeville">Sharpeville</a></li>
+        <li><a href="/towns/sasolburg">Sasolburg</a></li>
+        <li><a href="/advertise">Advertise With Us</a></li>
+        <li><a href="/subscribe">Subscribe to Newsletter</a></li>
+        <li><a href="/contact">Contact Us</a></li>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms of Service</a></li>
+      </ul>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
