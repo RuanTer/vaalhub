@@ -104,7 +104,7 @@ const Home = () => {
     {
       title: 'Keeping Your Operations Running With',
       highlight: 'Expert Electrical Solutions',
-      description: 'Over 50 years\' combined experience, same-day delivery, reliable support that keeps operations moving.',
+      description: 'Over 50 years\' combined experience — same-day delivery and reliable support.',
       image: '/ads/factorpro-logo.jpg',
       isAdvertisement: true,
       sponsorUrl: 'https://www.factorpro.co.za',
@@ -304,7 +304,7 @@ const Home = () => {
         </div>
 
         {/* Text + buttons + dots */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 pt-5 relative" style={{ minHeight: '140px' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 pt-5 relative overflow-hidden" style={{ height: '160px' }}>
           {heroSlides.map((slide, index) => (
             <div
               key={index}
