@@ -1,20 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import ArticleCard from '../components/ui/ArticleCard';
 import { TIMING } from '../config/constants';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeBox, setActiveBox] = useState(0);
-  const [currentArticleSlide, setCurrentArticleSlide] = useState(0);
+
+  // Featured content state
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [featuredNews, setFeaturedNews] = useState([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
 
   // Hero swipe state
   const [heroTouchStartX, setHeroTouchStartX] = useState(null);
   const [heroDragOffset, setHeroDragOffset] = useState(0);
 
-  // Article swipe state
-  const [articleTouchStartX, setArticleTouchStartX] = useState(null);
-  const [articleDragOffset, setArticleDragOffset] = useState(0);
+  // Modal state
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showBusinessModal, setShowBusinessModal] = useState(false);
+  const [showSponsorModal, setShowSponsorModal] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
+  // Form state
+  const [eventForm, setEventForm] = useState({ name: '', email: '', phone: '', eventName: '', date: '', location: '', description: '' });
+  const [businessForm, setBusinessForm] = useState({ name: '', email: '', phone: '', businessName: '', category: '', location: '', website: '', description: '' });
 
   const heroSlides = [
     {
@@ -23,8 +34,8 @@ const Home = () => {
       description: 'Your trusted source for local news, events, and business information across the Vaal Triangle.',
       image: 'https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=1200',
       buttons: [
-        { text: 'Explore the Vaal', link: '/explore', primary: true },
-        { text: 'Local Businesses', link: '/business', primary: false },
+        { text: 'Local Businesses', link: '/businesses', primary: true },
+        { text: 'Explore Events', link: '/events', primary: false },
       ],
       duration: 3000,
     },
@@ -34,6 +45,7 @@ const Home = () => {
       description: 'Over 50 years\' combined experience, same-day delivery, reliable support that keeps operations moving.',
       image: '/ads/factorpro-logo.jpg',
       isAdvertisement: true,
+      sponsorUrl: 'https://www.factorpro.co.za',
       buttons: [],
       duration: 7000,
     },
@@ -44,57 +56,9 @@ const Home = () => {
       image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200',
       buttons: [
         { text: 'Get Started', link: '/advertise', primary: true },
-        { text: 'View Packages', link: '/advertise', primary: false },
+        { text: 'Add Your Business', link: '/verify-business', primary: false },
       ],
       duration: 4000,
-    },
-  ];
-
-  const featuredArticles = [
-    {
-      id: 1,
-      title: 'Exploring the Vaal Triangle: Attractions, History, and Local Life',
-      excerpt: 'The Vaal Triangle is the industrial–urban region linking Vereeniging, Vanderbijlpark and Sasolburg about 60 km south of Johannesburg.',
-      category: 'Featured',
-      image: 'https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=800',
-      date: 'January 16, 2026',
-      slug: '/towns',
-    },
-    {
-      id: 2,
-      title: 'Vereeniging: History, Things to Do, Businesses & Local Life',
-      excerpt: 'Vereeniging is the commercial and administrative centre of the Vaal Triangle. Founded in the late 1800s, the town played a critical role in South Africa\'s early industrial development.',
-      category: 'Towns',
-      image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800',
-      date: 'January 16, 2026',
-      slug: '/towns/vereeniging',
-    },
-    {
-      id: 3,
-      title: 'Vanderbijlpark: Industry, Lifestyle, Things to Do',
-      excerpt: 'Vanderbijlpark is a planned industrial town established in the mid-20th century. Designed to support steel production and technical education.',
-      category: 'Towns',
-      image: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800',
-      date: 'January 16, 2026',
-      slug: '/towns/vanderbijlpark',
-    },
-    {
-      id: 4,
-      title: 'Meyerton: Small-Town Living, Nature & Growing Local Business',
-      excerpt: 'Meyerton offers a quieter, more small-town alternative within the Vaal Triangle, known for its relaxed pace of life and agricultural surroundings.',
-      category: 'Towns',
-      image: 'https://images.unsplash.com/photo-1523459178261-028135da2714?w=800',
-      date: 'January 16, 2026',
-      slug: '/towns/meyerton',
-    },
-    {
-      id: 5,
-      title: 'Sharpeville: A Place of Global Historical Importance',
-      excerpt: 'Sharpeville holds a unique and profound place in South African and world history, internationally recognised for its role in the struggle for human rights.',
-      category: 'Heritage',
-      image: 'https://images.unsplash.com/photo-1518176258769-f227c798150e?w=800',
-      date: 'January 16, 2026',
-      slug: '/towns/sharpeville',
     },
   ];
 
@@ -121,7 +85,28 @@ const Home = () => {
     },
   ];
 
-  // ─── Hero auto-advance ───────────────────────────────────────
+  // ─── Fetch featured content ───────────────────────────────────
+  useEffect(() => {
+    const fetchFeaturedContent = async () => {
+      try {
+        setLoadingFeatured(true);
+        const eventsResponse = await fetch(`${API_URL}/api/featured/events?limit=5`);
+        const eventsData = await eventsResponse.json();
+        if (eventsData.success) setFeaturedEvents(eventsData.data);
+
+        const newsResponse = await fetch(`${API_URL}/api/featured/news?limit=5`);
+        const newsData = await newsResponse.json();
+        if (newsData.success) setFeaturedNews(newsData.data);
+      } catch (error) {
+        console.error('Error fetching featured content:', error);
+      } finally {
+        setLoadingFeatured(false);
+      }
+    };
+    fetchFeaturedContent();
+  }, []);
+
+  // ─── Hero auto-advance ────────────────────────────────────────
   useEffect(() => {
     const duration = heroSlides[currentSlide]?.duration || TIMING.CAROUSEL_INTERVAL;
     const timer = setTimeout(() => {
@@ -148,121 +133,113 @@ const Home = () => {
   }, [heroSlides.length]);
 
   // ─── Hero touch / swipe ──────────────────────────────────────
-  const onHeroTouchStart = (e) => {
-    setHeroTouchStartX(e.touches[0].clientX);
-    setHeroDragOffset(0);
-  };
-  const onHeroTouchMove = (e) => {
-    if (heroTouchStartX === null) return;
-    setHeroDragOffset(e.touches[0].clientX - heroTouchStartX);
-  };
+  const onHeroTouchStart = (e) => { setHeroTouchStartX(e.touches[0].clientX); setHeroDragOffset(0); };
+  const onHeroTouchMove = (e) => { if (heroTouchStartX === null) return; setHeroDragOffset(e.touches[0].clientX - heroTouchStartX); };
   const onHeroTouchEnd = () => {
     if (heroTouchStartX === null) return;
     if (heroDragOffset < -50) nextSlide();
     else if (heroDragOffset > 50) prevSlide();
-    setHeroTouchStartX(null);
-    setHeroDragOffset(0);
+    setHeroTouchStartX(null); setHeroDragOffset(0);
   };
 
-  // ─── Article navigation ─────────────────────────────────────
-  const nextArticleSlide = useCallback(() => {
-    setCurrentArticleSlide((prev) => (prev + 1) % featuredArticles.length);
-  }, [featuredArticles.length]);
+  // ─── Format dates ─────────────────────────────────────────────
+  const formatEventDate = (dateStr) => {
+    if (!dateStr) return 'Date TBD';
+    return new Date(dateStr).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
 
-  const prevArticleSlide = useCallback(() => {
-    setCurrentArticleSlide((prev) => (prev - 1 + featuredArticles.length) % featuredArticles.length);
-  }, [featuredArticles.length]);
+  const formatNewsDate = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
 
-  // ─── Article touch / swipe ───────────────────────────────────
-  const onArticleTouchStart = (e) => {
-    setArticleTouchStartX(e.touches[0].clientX);
-    setArticleDragOffset(0);
+  // ─── Form submit handlers ─────────────────────────────────────
+  const handleEventSubmit = (e) => {
+    e.preventDefault();
+    const subject = encodeURIComponent(`New Event Submission: ${eventForm.eventName}`);
+    const body = encodeURIComponent(
+      `Name: ${eventForm.name}\nEmail: ${eventForm.email}\nPhone: ${eventForm.phone}\n\nEvent Name: ${eventForm.eventName}\nDate: ${eventForm.date}\nLocation: ${eventForm.location}\n\nDescription:\n${eventForm.description}`
+    );
+    window.location.href = `mailto:info@vaalhub.co.za?subject=${subject}&body=${body}`;
+    setFormSubmitted(true);
+    setTimeout(() => {
+      setShowEventModal(false);
+      setFormSubmitted(false);
+      setEventForm({ name: '', email: '', phone: '', eventName: '', date: '', location: '', description: '' });
+    }, 3000);
   };
-  const onArticleTouchMove = (e) => {
-    if (articleTouchStartX === null) return;
-    setArticleDragOffset(e.touches[0].clientX - articleTouchStartX);
+
+  const handleBusinessSubmit = (e) => {
+    e.preventDefault();
+    const subject = encodeURIComponent(`New Business Submission: ${businessForm.businessName}`);
+    const body = encodeURIComponent(
+      `Contact Name: ${businessForm.name}\nEmail: ${businessForm.email}\nPhone: ${businessForm.phone}\n\nBusiness Name: ${businessForm.businessName}\nCategory: ${businessForm.category}\nLocation: ${businessForm.location}\nWebsite: ${businessForm.website}\n\nDescription:\n${businessForm.description}`
+    );
+    window.location.href = `mailto:info@vaalhub.co.za?subject=${subject}&body=${body}`;
+    setFormSubmitted(true);
+    setTimeout(() => {
+      setShowBusinessModal(false);
+      setFormSubmitted(false);
+      setBusinessForm({ name: '', email: '', phone: '', businessName: '', category: '', location: '', website: '', description: '' });
+    }, 3000);
   };
-  const onArticleTouchEnd = () => {
-    if (articleTouchStartX === null) return;
-    if (articleDragOffset < -50) nextArticleSlide();
-    else if (articleDragOffset > 50) prevArticleSlide();
-    setArticleTouchStartX(null);
-    setArticleDragOffset(0);
-  };
+
+  const inputClass = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-vaal-orange-500 focus:border-transparent';
 
   return (
     <div>
+
       {/* ═══════════════════════════════════════════════════════════
           HERO CAROUSEL
-          • Image strip slides horizontally (swipeable on mobile)
-          • Images sit inside a padded, rounded container – no cropping
-          • Text + buttons live BELOW the image and fade in/out
           ═══════════════════════════════════════════════════════════ */}
       <section className="bg-white">
-        {/* ── Image area with edge buffers, constrained to nav width ── */}
         <div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4"
           onTouchStart={onHeroTouchStart}
           onTouchMove={onHeroTouchMove}
           onTouchEnd={onHeroTouchEnd}
         >
-          {/* Outer rounded frame – clips the sliding strip.
-              Height is capped so the image never exceeds ~38vh on desktop,
-              leaving room for text + a peek of the next section. */}
           <div className="relative overflow-hidden rounded-2xl" style={{ height: '38vh', maxHeight: '420px', minHeight: '220px' }}>
-            {/* Slide strip – images side by side, translated */}
             <div
               className="flex h-full transition-transform duration-500 ease-out will-change-transform"
-              style={{
-                transform: `translate3d(calc(-${currentSlide * 100}% + ${heroDragOffset}px), 0, 0)`,
-              }}
+              style={{ transform: `translate3d(calc(-${currentSlide * 100}% + ${heroDragOffset}px), 0, 0)` }}
             >
               {heroSlides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`relative flex-shrink-0 w-full h-full ${slide.isAdvertisement ? 'bg-gray-100' : ''}`}
-                >
+                <div key={index} className={`relative flex-shrink-0 w-full h-full ${slide.isAdvertisement ? 'bg-gray-100' : ''}`}>
                   <img
                     src={slide.image}
                     alt={slide.title}
                     className={`w-full h-full ${slide.isAdvertisement ? 'object-contain' : 'object-cover'}`}
                   />
-
-                  {/* Sponsored badge – sits inside the image, top-left */}
+                  {/* Gold glowing Sponsored badge */}
                   {slide.isAdvertisement && (
-                    <span className="absolute top-3 left-3 z-10 px-3 py-0.5 bg-vaal-orange-500 text-white text-xs font-semibold rounded-full">
-                      Sponsored
+                    <span
+                      className="absolute top-3 left-3 z-10 px-3 py-1 text-xs font-bold rounded-full"
+                      style={{
+                        background: '#d4af37',
+                        color: '#1a1a1a',
+                        boxShadow: '0 0 10px 3px rgba(212,175,55,0.7), 0 0 20px 6px rgba(212,175,55,0.3)',
+                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                      }}
+                    >
+                      ✦ Sponsored
                     </span>
                   )}
                 </div>
               ))}
             </div>
 
-            {/* ── Left arrow ── */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-              aria-label="Previous slide"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+            {/* Arrows */}
+            <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors" aria-label="Previous slide">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-
-            {/* ── Right arrow ── */}
-            <button
-              onClick={nextSlide}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-              aria-label="Next slide"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+            <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors" aria-label="Next slide">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
 
-        {/* ── Text + buttons (fade in/out) + dots ── */}
+        {/* Text + buttons + dots */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 pt-5 relative" style={{ minHeight: '140px' }}>
           {heroSlides.map((slide, index) => (
             <div
@@ -277,35 +254,46 @@ const Home = () => {
             >
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
                 {slide.title}{' '}
-                <span className="text-vaal-orange-500">{slide.highlight}</span>
+                {slide.isAdvertisement ? (
+                  <span className="font-bold text-gray-900">
+                    {slide.highlight}
+                  </span>
+                ) : (
+                  <span className="text-vaal-orange-500">{slide.highlight}</span>
+                )}
               </h1>
 
-              <p className="text-gray-600 text-sm mt-1.5 max-w-2xl">
-                {slide.description}
-              </p>
+              <p className="text-gray-600 text-sm mt-1.5 max-w-2xl">{slide.description}</p>
 
-              {/* CTA buttons */}
-              {slide.buttons.length > 0 && (
-                <div className="flex flex-wrap gap-3 mt-3">
-                  {slide.buttons.map((btn, i) => (
-                    <Link
-                      key={i}
-                      to={btn.link}
-                      className={`px-5 py-1.5 rounded-md text-sm font-semibold transition-colors ${
-                        btn.primary
-                          ? 'bg-vaal-orange-500 text-white hover:bg-vaal-orange-600'
-                          : 'bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200'
-                      }`}
-                    >
-                      {btn.text}
-                    </Link>
-                  ))}
-                </div>
-              )}
+              <div className="flex flex-wrap gap-3 mt-3">
+                {slide.buttons.map((btn, i) => (
+                  <Link
+                    key={i}
+                    to={btn.link}
+                    className={`px-5 py-1.5 rounded-md text-sm font-semibold transition-colors ${
+                      btn.primary
+                        ? 'bg-vaal-orange-500 text-white hover:bg-vaal-orange-600'
+                        : 'bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200'
+                    }`}
+                  >
+                    {btn.text}
+                  </Link>
+                ))}
+                {/* Contact sponsor button on ad slide */}
+                {slide.isAdvertisement && (
+                  <button
+                    onClick={() => setShowSponsorModal(true)}
+                    className="px-5 py-1.5 rounded-md text-sm font-semibold border-2 transition-all hover:scale-105"
+                    style={{ borderColor: '#d4af37', color: '#d4af37', background: 'transparent' }}
+                  >
+                    Contact Sponsor
+                  </button>
+                )}
+              </div>
             </div>
           ))}
 
-          {/* ── Dots ── */}
+          {/* Dots */}
           <div className="flex justify-center gap-2 mt-4">
             {heroSlides.map((_, i) => (
               <button
@@ -313,9 +301,7 @@ const Home = () => {
                 onClick={() => setCurrentSlide(i)}
                 aria-label={`Go to slide ${i + 1}`}
                 className={`rounded-full transition-all duration-300 ${
-                  i === currentSlide
-                    ? 'w-7 h-2.5 bg-vaal-orange-500'
-                    : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
+                  i === currentSlide ? 'w-7 h-2.5 bg-vaal-orange-500' : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
                 }`}
               />
             ))}
@@ -324,111 +310,187 @@ const Home = () => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
+          EVENTS IN THE VAAL
+          ═══════════════════════════════════════════════════════════ */}
+      {!loadingFeatured && featuredEvents.length > 0 && (
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Events in the Vaal</h2>
+              <Link
+                to="/events"
+                className="px-5 py-2 bg-vaal-orange-500 text-white text-sm font-semibold rounded-lg flex items-center gap-2 animate-pulse hover:animate-none hover:bg-vaal-orange-600 transition-colors"
+              >
+                View All Events
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredEvents.slice(0, 3).map((event) => (
+                <Link
+                  key={event.event_id}
+                  to="/events"
+                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group"
+                >
+                  <div className="relative h-48 bg-gray-200 overflow-hidden">
+                    {event.image_url ? (
+                      <img src={event.image_url} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-vaal-orange-100 to-vaal-orange-200">
+                        <svg className="w-16 h-16 text-vaal-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    {event.category && (
+                      <div className="absolute top-3 left-3 bg-vaal-orange-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        {event.category}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-vaal-orange-600 transition-colors">
+                        {event.title}
+                      </h3>
+                      <div className="space-y-2 mb-3">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <svg className="w-4 h-4 mr-2 text-vaal-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {formatEventDate(event.date_start)}
+                        </div>
+                        {event.location && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <svg className="w-4 h-4 mr-2 text-vaal-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {event.location}
+                          </div>
+                        )}
+                      </div>
+                      {event.description && (
+                        <p className="text-gray-600 text-sm line-clamp-2">{event.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          TOP NEWS
+          ═══════════════════════════════════════════════════════════ */}
+      {!loadingFeatured && featuredNews.length > 0 && (
+        <section className="py-12 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Top News</h2>
+              <Link
+                to="/news"
+                className="px-5 py-2 bg-vaal-orange-500 text-white text-sm font-semibold rounded-lg flex items-center gap-2 animate-pulse hover:animate-none hover:bg-vaal-orange-600 transition-colors"
+              >
+                View All News
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredNews.slice(0, 5).map((article) => (
+                <Link
+                  key={article.news_id}
+                  to={`/news/${article.news_id}`}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100"
+                >
+                  {/* Always show image area */}
+                  <div className="aspect-video bg-gray-200 overflow-hidden">
+                    {article.image_url ? (
+                      <img src={article.image_url} alt={article.headline} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {article.category && (
+                          <span className="inline-block px-3 py-1 bg-vaal-orange-100 text-vaal-orange-700 text-xs font-medium rounded-full">
+                            {article.category}
+                          </span>
+                        )}
+                        {article.area && (
+                          <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                            {article.area}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-vaal-orange-600 transition-colors">
+                        {article.headline}
+                      </h3>
+                      {article.summary && (
+                        <p className="text-gray-600 text-sm line-clamp-3 mb-2">{article.summary}</p>
+                      )}
+                      <p className="text-xs text-gray-400">{formatNewsDate(article.publish_date)}</p>
+                    </div>
+                    <div className="mt-4">
+                      <span className="inline-flex items-center text-sm font-semibold text-vaal-orange-600 group-hover:text-vaal-orange-700">
+                        Read More
+                        <svg className="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
           KEY FOCUS AREAS
           ═══════════════════════════════════════════════════════════ */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Our Key Focus Areas
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Key Focus Areas</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Discover how our core programs, stories, and commitment to transparency work together to create lasting change in our communities.
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border border-gray-200 rounded-xl overflow-hidden">
             {keyFocusAreas.map((area, index) => (
               <div
                 key={index}
                 className={`p-8 border-r border-b border-gray-200 last:border-r-0 transition-all duration-500 cursor-pointer ${
-                  index === activeBox
-                    ? 'bg-vaal-orange-500 text-white'
-                    : 'bg-white text-gray-900 hover:bg-gray-50'
+                  index === activeBox ? 'bg-vaal-orange-500 text-white' : 'bg-white text-gray-900 hover:bg-gray-50'
                 }`}
                 onClick={() => setActiveBox(index)}
               >
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full font-bold text-xl mb-4 ${
-                  index === activeBox
-                    ? 'bg-white text-vaal-orange-500'
-                    : 'bg-gray-100 text-gray-900'
+                  index === activeBox ? 'bg-white text-vaal-orange-500' : 'bg-gray-100 text-gray-900'
                 }`}>
                   {area.number}
                 </div>
                 <h3 className="text-xl font-bold mb-3">{area.title}</h3>
-                <p className={`text-sm ${index === activeBox ? 'text-white/90' : 'text-gray-600'}`}>
-                  {area.description}
-                </p>
+                <p className={`text-sm ${index === activeBox ? 'text-white/90' : 'text-gray-600'}`}>{area.description}</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════
-          FEATURED STORIES
-          Mobile: horizontal swipe strip, 85vw cards with peek
-          Desktop (md+): static responsive grid
-          ═══════════════════════════════════════════════════════════ */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Featured Stories
-            </h2>
-            {/* Arrow buttons – mobile only */}
-            <div className="flex md:hidden items-center gap-2">
-              <button
-                onClick={prevArticleSlide}
-                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                aria-label="Previous stories"
-              >
-                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={nextArticleSlide}
-                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                aria-label="Next stories"
-              >
-                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* ── MOBILE swipe strip (hidden on md+) ── */}
-          <div
-            className="md:hidden overflow-hidden"
-            onTouchStart={onArticleTouchStart}
-            onTouchMove={onArticleTouchMove}
-            onTouchEnd={onArticleTouchEnd}
-          >
-            <div
-              className="flex transition-transform duration-300 ease-out will-change-transform"
-              style={{
-                transform: `translate3d(calc(-${currentArticleSlide} * (85vw + 1rem) + ${articleDragOffset}px), 0, 0)`,
-              }}
-            >
-              {featuredArticles.map((article) => (
-                <div
-                  key={article.id}
-                  className="flex-shrink-0 pr-4"
-                  style={{ width: '85vw' }}
-                >
-                  <ArticleCard article={article} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── DESKTOP static grid (md+) ── */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         </div>
@@ -439,22 +501,233 @@ const Home = () => {
           ═══════════════════════════════════════════════════════════ */}
       <section className="py-16 bg-vaal-orange-500 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Building Stronger Communities Together
-          </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Building Stronger Communities Together</h2>
+          <p className="text-xl mb-10 max-w-2xl mx-auto">
             Join us in celebrating and supporting the vibrant communities across the Vaal Triangle
           </p>
-          <div className="flex justify-center">
+          <div className="flex flex-wrap justify-center gap-4">
             <Link
               to="/advertise"
-              className="px-8 py-3 bg-white text-vaal-orange-600 rounded-md hover:bg-gray-100 transition-colors font-medium"
+              className="px-7 py-3 bg-white text-vaal-orange-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold shadow"
             >
               Advertise With Us
             </Link>
+            <button
+              onClick={() => { setShowEventModal(true); setFormSubmitted(false); }}
+              className="px-7 py-3 border-2 border-white text-white rounded-lg hover:bg-white hover:text-vaal-orange-600 transition-colors font-semibold"
+            >
+              Add Your Event
+            </button>
+            <button
+              onClick={() => { setShowBusinessModal(true); setFormSubmitted(false); }}
+              className="px-7 py-3 border-2 border-white text-white rounded-lg hover:bg-white hover:text-vaal-orange-600 transition-colors font-semibold"
+            >
+              Add Your Business
+            </button>
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════
+          ADD YOUR EVENT MODAL
+          ═══════════════════════════════════════════════════════════ */}
+      {showEventModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-vaal-orange-500 text-white px-6 py-5 rounded-t-2xl flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold">Add Your Event</h3>
+                <p className="text-white/80 text-sm mt-1">Submit your event and we'll get it listed</p>
+              </div>
+              <button onClick={() => setShowEventModal(false)} className="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+
+            {formSubmitted ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Opening your email...</h4>
+                <p className="text-gray-600 text-sm">Your email client is opening with your event details pre-filled. Just click Send!</p>
+              </div>
+            ) : (
+              <form onSubmit={handleEventSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Your Name *</label>
+                    <input type="text" required className={inputClass} value={eventForm.name} onChange={e => setEventForm({...eventForm, name: e.target.value})} placeholder="John Smith" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email *</label>
+                    <input type="email" required className={inputClass} value={eventForm.email} onChange={e => setEventForm({...eventForm, email: e.target.value})} placeholder="you@email.com" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <input type="tel" className={inputClass} value={eventForm.phone} onChange={e => setEventForm({...eventForm, phone: e.target.value})} placeholder="+27 00 000 0000" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Event Name *</label>
+                  <input type="text" required className={inputClass} value={eventForm.eventName} onChange={e => setEventForm({...eventForm, eventName: e.target.value})} placeholder="e.g. Vaal Market Day" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Date *</label>
+                    <input type="date" required className={inputClass} value={eventForm.date} onChange={e => setEventForm({...eventForm, date: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Location *</label>
+                    <input type="text" required className={inputClass} value={eventForm.location} onChange={e => setEventForm({...eventForm, location: e.target.value})} placeholder="e.g. Vanderbijlpark" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Event Description *</label>
+                  <textarea required rows={4} className={inputClass} value={eventForm.description} onChange={e => setEventForm({...eventForm, description: e.target.value})} placeholder="Tell us about your event – what's happening, who it's for, cost, etc." />
+                </div>
+                <p className="text-xs text-gray-500">Clicking Submit will open your email client with all details pre-filled. Just click Send!</p>
+                <div className="flex gap-3 pt-2">
+                  <button type="button" onClick={() => setShowEventModal(false)} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">Cancel</button>
+                  <button type="submit" className="flex-1 px-4 py-2.5 bg-vaal-orange-500 text-white rounded-lg hover:bg-vaal-orange-600 transition-colors font-semibold text-sm">Submit Event</button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          ADD YOUR BUSINESS MODAL
+          ═══════════════════════════════════════════════════════════ */}
+      {showBusinessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-vaal-orange-500 text-white px-6 py-5 rounded-t-2xl flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold">Add Your Business</h3>
+                <p className="text-white/80 text-sm mt-1">Get your business listed on VaalHub</p>
+              </div>
+              <button onClick={() => setShowBusinessModal(false)} className="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+
+            {formSubmitted ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Opening your email...</h4>
+                <p className="text-gray-600 text-sm">Your email client is opening with your business details pre-filled. Just click Send!</p>
+              </div>
+            ) : (
+              <form onSubmit={handleBusinessSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Your Name *</label>
+                    <input type="text" required className={inputClass} value={businessForm.name} onChange={e => setBusinessForm({...businessForm, name: e.target.value})} placeholder="John Smith" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email *</label>
+                    <input type="email" required className={inputClass} value={businessForm.email} onChange={e => setBusinessForm({...businessForm, email: e.target.value})} placeholder="you@email.com" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <input type="tel" className={inputClass} value={businessForm.phone} onChange={e => setBusinessForm({...businessForm, phone: e.target.value})} placeholder="+27 00 000 0000" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Business Name *</label>
+                  <input type="text" required className={inputClass} value={businessForm.businessName} onChange={e => setBusinessForm({...businessForm, businessName: e.target.value})} placeholder="e.g. Vaal Plumbing Services" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Category *</label>
+                    <select required className={inputClass} value={businessForm.category} onChange={e => setBusinessForm({...businessForm, category: e.target.value})}>
+                      <option value="">Select category</option>
+                      <option>Restaurant</option>
+                      <option>Retail</option>
+                      <option>Services</option>
+                      <option>Healthcare</option>
+                      <option>Entertainment</option>
+                      <option>Automotive</option>
+                      <option>Construction</option>
+                      <option>Professional Services</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Location *</label>
+                    <select required className={inputClass} value={businessForm.location} onChange={e => setBusinessForm({...businessForm, location: e.target.value})}>
+                      <option value="">Select area</option>
+                      <option>Vereeniging</option>
+                      <option>Vanderbijlpark</option>
+                      <option>Meyerton</option>
+                      <option>Sasolburg</option>
+                      <option>Sharpeville</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Website (optional)</label>
+                  <input type="url" className={inputClass} value={businessForm.website} onChange={e => setBusinessForm({...businessForm, website: e.target.value})} placeholder="https://yourbusiness.co.za" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Business Description *</label>
+                  <textarea required rows={3} className={inputClass} value={businessForm.description} onChange={e => setBusinessForm({...businessForm, description: e.target.value})} placeholder="Tell us about your business – what you do, services offered, etc." />
+                </div>
+                <p className="text-xs text-gray-500">Clicking Submit will open your email client with all details pre-filled. Just click Send!</p>
+                <div className="flex gap-3 pt-2">
+                  <button type="button" onClick={() => setShowBusinessModal(false)} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">Cancel</button>
+                  <button type="submit" className="flex-1 px-4 py-2.5 bg-vaal-orange-500 text-white rounded-lg hover:bg-vaal-orange-600 transition-colors font-semibold text-sm">Submit Business</button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          CONTACT SPONSOR MODAL
+          ═══════════════════════════════════════════════════════════ */}
+      {showSponsorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+            <div className="px-6 py-5 rounded-t-2xl flex justify-between items-center" style={{ background: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)' }}>
+              <div>
+                <h3 className="text-xl font-bold" style={{ color: '#d4af37', textShadow: '0 0 8px rgba(212,175,55,0.6)' }}>Sponsor Info</h3>
+                <p className="text-gray-400 text-sm mt-1">FactorPro Electrical</p>
+              </div>
+              <button onClick={() => setShowSponsorModal(false)} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-gray-600 text-sm">Interested in working with FactorPro or becoming a sponsor on VaalHub?</p>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="https://www.factorpro.co.za"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-4 py-2.5 text-center text-sm font-bold rounded-lg transition-all hover:scale-105"
+                  style={{ background: '#d4af37', color: '#1a1a1a', boxShadow: '0 0 10px 2px rgba(212,175,55,0.4)' }}
+                >
+                  Visit FactorPro Website
+                </a>
+                <a
+                  href="mailto:info@vaalhub.co.za?subject=Sponsorship%20Enquiry"
+                  className="w-full px-4 py-2.5 text-center bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                >
+                  Enquire About Sponsorship
+                </a>
+                <button onClick={() => setShowSponsorModal(false)} className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -3,6 +3,11 @@ import Layout from './components/layout/Layout';
 
 // Pages
 import Home from './pages/Home';
+import News from './pages/News';
+import NewsDetail from './pages/NewsDetail';
+import Events from './pages/Events';
+import Businesses from './pages/Businesses';
+import VerifyBusiness from './pages/VerifyBusiness';
 import Advertise from './pages/Advertise';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
@@ -30,13 +35,19 @@ function App() {
           <Route path="/towns/sharpeville" element={<Sharpeville />} />
           <Route path="/towns/sasolburg" element={<Sasolburg />} />
 
+          {/* News & Events */}
+          <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/businesses" element={<Businesses />} />
+          <Route path="/verify-business" element={<VerifyBusiness />} />
+
           {/* Placeholder routes - to be built */}
           <Route path="/explore" element={<Home />} />
           <Route path="/towns" element={<Home />} />
           <Route path="/things-to-do" element={<Home />} />
           <Route path="/restaurants" element={<Home />} />
-          <Route path="/events" element={<Home />} />
-          <Route path="/business" element={<Home />} />
+          <Route path="/business" element={<Businesses />} />
           <Route path="/living" element={<Home />} />
           <Route path="/about" element={<Home />} />
           <Route path="/contact" element={<Contact />} />

@@ -11,13 +11,13 @@ const Header = () => {
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Business', href: '#', comingSoon: true },
-    { name: 'Events', href: '#', comingSoon: true },
+    { name: 'News', href: '/news' },
+    { name: 'Events', href: '/events' },
+    { name: 'Businesses', href: '/businesses' },
     { name: 'Towns', href: '/towns', submenu: TOWNS.map(town => ({
       name: town.name,
       href: town.path,
     }))},
-    { name: 'Explore', href: '#', comingSoon: true },
   ];
 
   // Auto-close modal on success
