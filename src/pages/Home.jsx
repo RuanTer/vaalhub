@@ -2,16 +2,78 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { TIMING } from '../config/constants';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || '';
+const IS_LOCAL_API = !API_URL || API_URL.includes('localhost') || API_URL.includes('127.0.0.1');
+
+// Static placeholder content shown when no live API is available
+const PLACEHOLDER_EVENTS = [
+  {
+    event_id: 1,
+    title: 'Vaal Community Market',
+    date_start: '2025-03-15',
+    location: 'Vanderbijlpark',
+    category: 'Market',
+    description: 'Browse local produce, crafts, and food stalls at the monthly Vaal community market.',
+    image_url: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600',
+  },
+  {
+    event_id: 2,
+    title: 'Vaal River Festival',
+    date_start: '2025-04-05',
+    location: 'Vereeniging',
+    category: 'Festival',
+    description: 'Annual riverside festival featuring live music, water sports, and local food vendors.',
+    image_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600',
+  },
+  {
+    event_id: 3,
+    title: 'Business Networking Evening',
+    date_start: '2025-03-22',
+    location: 'Meyerton',
+    category: 'Networking',
+    description: 'Connect with local business owners and entrepreneurs across the Vaal Triangle.',
+    image_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=600',
+  },
+];
+
+const PLACEHOLDER_NEWS = [
+  {
+    news_id: 1,
+    headline: 'Vaal Triangle Welcomes New Community Development Projects',
+    summary: 'Several new infrastructure and community upliftment projects have been announced for the Vaal Triangle region.',
+    category: 'Community',
+    area: 'Vaal Triangle',
+    publish_date: '2025-02-10',
+    image_url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600',
+  },
+  {
+    news_id: 2,
+    headline: 'Local Businesses Thrive as Tourism Grows in the Vaal',
+    summary: 'Small businesses across Vanderbijlpark and Vereeniging are reporting increased foot traffic as tourism picks up.',
+    category: 'Business',
+    area: 'Vanderbijlpark',
+    publish_date: '2025-02-08',
+    image_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600',
+  },
+  {
+    news_id: 3,
+    headline: 'Vaal River Water Levels Improve After Recent Rainfall',
+    summary: 'Recent rains have brought welcome relief to the Vaal Dam, with levels rising significantly over the past month.',
+    category: 'Environment',
+    area: 'Vereeniging',
+    publish_date: '2025-02-05',
+    image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600',
+  },
+];
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeBox, setActiveBox] = useState(0);
 
-  // Featured content state
-  const [featuredEvents, setFeaturedEvents] = useState([]);
-  const [featuredNews, setFeaturedNews] = useState([]);
-  const [loadingFeatured, setLoadingFeatured] = useState(true);
+  // Featured content state — start with placeholders so sections always show
+  const [featuredEvents, setFeaturedEvents] = useState(PLACEHOLDER_EVENTS);
+  const [featuredNews, setFeaturedNews] = useState(PLACEHOLDER_NEWS);
+  const [loadingFeatured, setLoadingFeatured] = useState(false);
 
   // Hero swipe state
   const [heroTouchStartX, setHeroTouchStartX] = useState(null);
@@ -85,20 +147,22 @@ const Home = () => {
     },
   ];
 
-  // ─── Fetch featured content ───────────────────────────────────
+  // ─── Fetch featured content (only when a real API is available) ──
   useEffect(() => {
+    if (IS_LOCAL_API) return; // skip on live site — use placeholder data
     const fetchFeaturedContent = async () => {
       try {
         setLoadingFeatured(true);
         const eventsResponse = await fetch(`${API_URL}/api/featured/events?limit=5`);
         const eventsData = await eventsResponse.json();
-        if (eventsData.success) setFeaturedEvents(eventsData.data);
+        if (eventsData.success && eventsData.data.length > 0) setFeaturedEvents(eventsData.data);
 
         const newsResponse = await fetch(`${API_URL}/api/featured/news?limit=5`);
         const newsData = await newsResponse.json();
-        if (newsData.success) setFeaturedNews(newsData.data);
+        if (newsData.success && newsData.data.length > 0) setFeaturedNews(newsData.data);
       } catch (error) {
         console.error('Error fetching featured content:', error);
+        // placeholders already set as default state — nothing more needed
       } finally {
         setLoadingFeatured(false);
       }
