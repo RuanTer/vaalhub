@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SponsorBanner from '../components/ui/SponsorBanner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -73,6 +74,9 @@ export default function News() {
           </p>
         </div>
       </div>
+
+      {/* Sponsor Banner */}
+      <SponsorBanner />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Filters */}

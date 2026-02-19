@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { TIMING } from '../config/constants';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-const IS_LOCAL_API = !API_URL || API_URL.includes('localhost') || API_URL.includes('127.0.0.1');
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Static placeholder content shown when no live API is available
 const PLACEHOLDER_EVENTS = [
@@ -66,6 +65,116 @@ const PLACEHOLDER_NEWS = [
   },
 ];
 
+// ─── Horizontal scroll carousel component ──────────────────────
+// Desktop: shows as grid when ≤3 cards; activates carousel when >3
+// Mobile: always carousel with swipe indicator dots
+function CardCarousel({ children, itemCount }) {
+  const trackRef = useRef(null);
+  const [canScroll, setCanScroll] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Determine if carousel should be active
+  const carouselActive = isMobile || itemCount > 3;
+
+  // Track scroll progress for dot indicator
+  const handleScroll = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollPct(max > 0 ? el.scrollLeft / max : 0);
+    setCanScroll(max > 0);
+  }, []);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    // check on mount
+    const max = el.scrollWidth - el.clientWidth;
+    setCanScroll(max > 0);
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [handleScroll, children]);
+
+  if (!carouselActive) {
+    // Plain grid (desktop, ≤3 cards)
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {children}
+      </div>
+    );
+  }
+
+  // Carousel mode
+  const dotCount = Math.max(1, itemCount - 2); // rough dot indicator
+  const activeDot = Math.round(scrollPct * (dotCount - 1));
+
+  return (
+    <div className="relative">
+      {/* Scrollable track */}
+      <div
+        ref={trackRef}
+        className="flex gap-5 overflow-x-auto pb-3 snap-x snap-mandatory"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {/* Each child gets a fixed-width snap card */}
+        {Array.isArray(children) ? children.map((child, i) => (
+          <div
+            key={i}
+            className="flex-shrink-0 snap-start"
+            style={{ width: isMobile ? '82vw' : '320px', maxWidth: '360px' }}
+          >
+            {child}
+          </div>
+        )) : (
+          <div className="flex-shrink-0 snap-start" style={{ width: isMobile ? '82vw' : '320px', maxWidth: '360px' }}>
+            {children}
+          </div>
+        )}
+      </div>
+
+      {/* Swipe indicator (mobile always, desktop if scrollable) */}
+      {(isMobile || canScroll) && (
+        <div className="mt-3 flex flex-col items-center gap-1">
+          {isMobile && (
+            <p className="text-xs text-gray-400 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-vaal-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              Swipe to see more
+            </p>
+          )}
+          {/* Progress dots */}
+          <div className="flex gap-1.5 justify-center">
+            {Array.from({ length: dotCount }).map((_, i) => (
+              <div
+                key={i}
+                className={`rounded-full transition-all duration-300 ${
+                  i === activeDot
+                    ? 'w-5 h-2 bg-vaal-orange-500'
+                    : 'w-2 h-2 bg-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeBox, setActiveBox] = useState(0);
@@ -75,6 +184,10 @@ const Home = () => {
   const [featuredNews, setFeaturedNews] = useState(PLACEHOLDER_NEWS);
   const [loadingFeatured, setLoadingFeatured] = useState(false);
 
+  // Sponsors + hero slides from API
+  const [sponsors, setSponsors] = useState([]);
+  const [heroSlidesDB, setHeroSlidesDB] = useState([]);
+
   // Hero swipe state
   const [heroTouchStartX, setHeroTouchStartX] = useState(null);
   const [heroDragOffset, setHeroDragOffset] = useState(0);
@@ -83,46 +196,72 @@ const Home = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [showSponsorModal, setShowSponsorModal] = useState(false);
+  const [activeSponsor, setActiveSponsor] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Form state
   const [eventForm, setEventForm] = useState({ name: '', email: '', phone: '', eventName: '', date: '', location: '', description: '' });
   const [businessForm, setBusinessForm] = useState({ name: '', email: '', phone: '', businessName: '', category: '', location: '', website: '', description: '' });
 
-  const heroSlides = [
+  // ── Convert DB hero slides into slide objects ────────────────────
+  // Fallback hardcoded slides used before the API responds
+  const FALLBACK_SLIDES = [
     {
       title: 'Discover Local Impact in',
       highlight: 'Communities Worldwide',
       description: 'Your trusted source for local news, events, and business information across the Vaal Triangle.',
       image: 'https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=1200',
-      buttons: [
-        { text: 'Local Businesses', link: '/businesses', primary: true },
-        { text: 'Explore Events', link: '/events', primary: false },
-      ],
+      buttons: [{ text: 'Local Businesses', link: '/businesses', primary: true }, { text: 'Explore Events', link: '/events', primary: false }],
       duration: 3000,
-    },
-    {
-      title: 'Keeping Your Operations Running With',
-      highlight: 'Expert Electrical Solutions',
-      description: 'Over 50 years\' combined experience — same-day delivery and reliable support.',
-      image: '/ads/factorpro-logo.jpg',
-      isAdvertisement: true,
-      sponsorUrl: 'https://www.factorpro.co.za',
-      buttons: [],
-      duration: 7000,
+      display_order: 0,
     },
     {
       title: 'Advertise Your Business',
       highlight: 'Reach Local Customers',
       description: 'Connect with thousands of local residents and grow your business in the Vaal Triangle community.',
       image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200',
-      buttons: [
-        { text: 'Get Started', link: '/advertise', primary: true },
-        { text: 'Add Your Business', link: '/verify-business', primary: false },
-      ],
+      buttons: [{ text: 'Get Started', link: '/advertise', primary: true }, { text: 'Add Your Business', link: '/verify-business', primary: false }],
       duration: 4000,
+      display_order: 99,
     },
   ];
+
+  // Map DB rows → slide objects
+  const dbSlides = heroSlidesDB.map((s) => ({
+    title: s.title || '',
+    highlight: s.highlight || '',
+    description: s.description || '',
+    image: s.image_url || 'https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=1200',
+    buttons: [
+      ...(s.btn1_text ? [{ text: s.btn1_text, link: s.btn1_link || '/', primary: true }] : []),
+      ...(s.btn2_text ? [{ text: s.btn2_text, link: s.btn2_link || '/', primary: false }] : []),
+    ],
+    duration: s.duration || 4000,
+    display_order: s.display_order ?? 0,
+  }));
+
+  // Use DB slides when loaded, otherwise use fallbacks
+  const baseSlides = dbSlides.length > 0 ? dbSlides : FALLBACK_SLIDES;
+
+  // Sponsor slides injected between base slides based on display_order:
+  // sponsor slides sit at display_order 50, so they appear between order 0–49 and 50+
+  const sponsorSlides = sponsors.map((sp) => ({
+    title: sp.name,
+    highlight: sp.tagline || '',
+    description: sp.description || '',
+    image: sp.hero_image_url || sp.logo_url || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200',
+    isAdvertisement: true,
+    sponsorUrl: sp.website_url || '',
+    buttons: [],
+    duration: 7000,
+    display_order: 50,
+    sponsorData: sp,
+  }));
+
+  // Merge and sort all slides by display_order
+  const heroSlides = [...baseSlides, ...sponsorSlides].sort(
+    (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+  );
 
   const keyFocusAreas = [
     {
@@ -147,37 +286,60 @@ const Home = () => {
     },
   ];
 
-  // ─── Fetch featured content (only when a real API is available) ──
+  // ─── Fetch featured content + sponsors ───────────────────────
   useEffect(() => {
-    if (IS_LOCAL_API) return; // skip on live site — use placeholder data
-    const fetchFeaturedContent = async () => {
+    const fetchAll = async () => {
       try {
         setLoadingFeatured(true);
-        const eventsResponse = await fetch(`${API_URL}/api/featured/events?limit=5`);
-        const eventsData = await eventsResponse.json();
-        if (eventsData.success && eventsData.data.length > 0) setFeaturedEvents(eventsData.data);
 
-        const newsResponse = await fetch(`${API_URL}/api/featured/news?limit=5`);
-        const newsData = await newsResponse.json();
-        if (newsData.success && newsData.data.length > 0) setFeaturedNews(newsData.data);
+        const [eventsRes, newsRes, sponsorsRes, heroRes] = await Promise.allSettled([
+          fetch(`${API_URL}/api/featured/events?limit=5`),
+          fetch(`${API_URL}/api/featured/news?limit=5`),
+          fetch(`${API_URL}/api/sponsors`),
+          fetch(`${API_URL}/api/hero-slides`),
+        ]);
+
+        if (eventsRes.status === 'fulfilled') {
+          const d = await eventsRes.value.json();
+          if (d.success && d.data.length > 0) setFeaturedEvents(d.data);
+        }
+        if (newsRes.status === 'fulfilled') {
+          const d = await newsRes.value.json();
+          if (d.success && d.data.length > 0) setFeaturedNews(d.data);
+        }
+        if (sponsorsRes.status === 'fulfilled') {
+          const d = await sponsorsRes.value.json();
+          if (d.success) setSponsors(d.data);
+        }
+        if (heroRes.status === 'fulfilled') {
+          const d = await heroRes.value.json();
+          if (d.success && d.data.length > 0) setHeroSlidesDB(d.data);
+        }
       } catch (error) {
-        console.error('Error fetching featured content:', error);
-        // placeholders already set as default state — nothing more needed
+        console.error('Error fetching homepage data:', error);
       } finally {
         setLoadingFeatured(false);
       }
     };
-    fetchFeaturedContent();
+    fetchAll();
   }, []);
 
   // ─── Hero auto-advance ────────────────────────────────────────
   useEffect(() => {
+    if (heroSlides.length === 0) return;
     const duration = heroSlides[currentSlide]?.duration || TIMING.CAROUSEL_INTERVAL;
     const timer = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, duration);
     return () => clearTimeout(timer);
-  }, [currentSlide]);
+  }, [currentSlide, heroSlides.length]);
+
+  // Keep currentSlide in bounds when slides array changes (sponsors load async)
+  useEffect(() => {
+    if (currentSlide >= heroSlides.length && heroSlides.length > 0) {
+      setCurrentSlide(0);
+    }
+  }, [heroSlides.length]);
 
   // ─── Key Focus Areas auto-rotate ─────────────────────────────
   useEffect(() => {
@@ -319,9 +481,7 @@ const Home = () => {
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
                 {slide.title}{' '}
                 {slide.isAdvertisement ? (
-                  <span className="font-bold text-gray-900">
-                    {slide.highlight}
-                  </span>
+                  <span className="font-bold text-gray-900">{slide.highlight}</span>
                 ) : (
                   <span className="text-vaal-orange-500">{slide.highlight}</span>
                 )}
@@ -346,7 +506,7 @@ const Home = () => {
                 {/* Contact sponsor button on ad slide */}
                 {slide.isAdvertisement && (
                   <button
-                    onClick={() => setShowSponsorModal(true)}
+                    onClick={() => { setActiveSponsor(slide.sponsorData); setShowSponsorModal(true); }}
                     className="px-5 py-1.5 rounded-md text-sm font-semibold border-2 transition-all hover:scale-105"
                     style={{ borderColor: '#d4af37', color: '#d4af37', background: 'transparent' }}
                   >
@@ -374,7 +534,7 @@ const Home = () => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          EVENTS IN THE VAAL
+          EVENTS IN THE VAAL — CAROUSEL
           ═══════════════════════════════════════════════════════════ */}
       {!loadingFeatured && featuredEvents.length > 0 && (
         <section className="py-12 bg-gray-50">
@@ -392,12 +552,12 @@ const Home = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredEvents.slice(0, 3).map((event) => (
+            <CardCarousel itemCount={featuredEvents.length}>
+              {featuredEvents.map((event) => (
                 <Link
                   key={event.event_id}
                   to="/events"
-                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group"
+                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group h-full"
                 >
                   <div className="relative h-48 bg-gray-200 overflow-hidden">
                     {event.image_url ? (
@@ -412,6 +572,12 @@ const Home = () => {
                     {event.category && (
                       <div className="absolute top-3 left-3 bg-vaal-orange-500 text-white px-3 py-1 rounded-full text-xs font-medium">
                         {event.category}
+                      </div>
+                    )}
+                    {event.pinned === 1 && (
+                      <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-md">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        Popular
                       </div>
                     )}
                   </div>
@@ -445,13 +611,13 @@ const Home = () => {
                   </div>
                 </Link>
               ))}
-            </div>
+            </CardCarousel>
           </div>
         </section>
       )}
 
       {/* ═══════════════════════════════════════════════════════════
-          TOP NEWS
+          TOP NEWS — CAROUSEL
           ═══════════════════════════════════════════════════════════ */}
       {!loadingFeatured && featuredNews.length > 0 && (
         <section className="py-12 bg-white">
@@ -469,14 +635,13 @@ const Home = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredNews.slice(0, 5).map((article) => (
+            <CardCarousel itemCount={featuredNews.length}>
+              {featuredNews.map((article) => (
                 <Link
                   key={article.news_id}
                   to={`/news/${article.news_id}`}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100"
+                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100 h-full"
                 >
-                  {/* Always show image area */}
                   <div className="aspect-video bg-gray-200 overflow-hidden">
                     {article.image_url ? (
                       <img src={article.image_url} alt={article.headline} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
@@ -522,7 +687,7 @@ const Home = () => {
                   </div>
                 </Link>
               ))}
-            </div>
+            </CardCarousel>
           </div>
         </section>
       )}
@@ -753,7 +918,7 @@ const Home = () => {
       )}
 
       {/* ═══════════════════════════════════════════════════════════
-          CONTACT SPONSOR MODAL
+          CONTACT SPONSOR MODAL (dynamic — shows current sponsor)
           ═══════════════════════════════════════════════════════════ */}
       {showSponsorModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -761,22 +926,26 @@ const Home = () => {
             <div className="px-6 py-5 rounded-t-2xl flex justify-between items-center" style={{ background: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)' }}>
               <div>
                 <h3 className="text-xl font-bold" style={{ color: '#d4af37', textShadow: '0 0 8px rgba(212,175,55,0.6)' }}>Sponsor Info</h3>
-                <p className="text-gray-400 text-sm mt-1">FactorPro Electrical</p>
+                <p className="text-gray-400 text-sm mt-1">{activeSponsor?.name || 'Sponsor'}</p>
               </div>
               <button onClick={() => setShowSponsorModal(false)} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-gray-600 text-sm">Interested in working with FactorPro or becoming a sponsor on VaalHub?</p>
+              <p className="text-gray-600 text-sm">
+                Interested in working with {activeSponsor?.name || 'this sponsor'} or becoming a sponsor on VaalHub?
+              </p>
               <div className="flex flex-col gap-3">
-                <a
-                  href="https://www.factorpro.co.za"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full px-4 py-2.5 text-center text-sm font-bold rounded-lg transition-all hover:scale-105"
-                  style={{ background: '#d4af37', color: '#1a1a1a', boxShadow: '0 0 10px 2px rgba(212,175,55,0.4)' }}
-                >
-                  Visit FactorPro Website
-                </a>
+                {activeSponsor?.website_url && (
+                  <a
+                    href={activeSponsor.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full px-4 py-2.5 text-center text-sm font-bold rounded-lg transition-all hover:scale-105"
+                    style={{ background: '#d4af37', color: '#1a1a1a', boxShadow: '0 0 10px 2px rgba(212,175,55,0.4)' }}
+                  >
+                    Visit {activeSponsor.name} Website
+                  </a>
+                )}
                 <a
                   href="mailto:info@vaalhub.co.za?subject=Sponsorship%20Enquiry"
                   className="w-full px-4 py-2.5 text-center bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white text-sm font-semibold rounded-lg transition-colors"

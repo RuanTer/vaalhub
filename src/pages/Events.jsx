@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Modal from '../components/ui/Modal';
+import SponsorBanner from '../components/ui/SponsorBanner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -96,6 +97,9 @@ export default function Events() {
           </p>
         </div>
       </div>
+
+      {/* Sponsor Banner */}
+      <SponsorBanner />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Filters */}
@@ -250,6 +254,13 @@ export default function Events() {
                         <div className="text-2xl font-bold leading-none">{shortDate.day}</div>
                         <div className="text-xs font-semibold">{shortDate.month}</div>
                       </div>
+                      {/* Pinned / Most Viewed badge */}
+                      {event.pinned === 1 && (
+                        <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-md">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9v-2h2v2zm0-4H9V7h2v2z"/></svg>
+                          Popular
+                        </div>
+                      )}
                     </div>
 
                     {/* Event Details */}
