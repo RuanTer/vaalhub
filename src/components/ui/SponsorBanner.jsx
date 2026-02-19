@@ -1,7 +1,7 @@
 /**
  * SponsorBanner — horizontal sponsor strip shown on Events, News, Businesses pages.
- * Fetches active sponsors from /api/sponsors and renders a gold-themed banner.
- * Supports multiple sponsors (auto-rotates every 6 s when there is more than one).
+ * Single clean row: Sponsored badge | logo | name + tagline | dismiss
+ * No Visit Website button — keeps it tidy on mobile.
  */
 
 import { useState, useEffect } from 'react';
@@ -13,17 +13,15 @@ export default function SponsorBanner() {
   const [current, setCurrent] = useState(0);
   const [visible, setVisible] = useState(true);
 
-  // Fetch sponsors
   useEffect(() => {
     fetch(`${API_URL}/api/sponsors`)
       .then((r) => r.json())
       .then((d) => {
         if (d.success && d.data.length > 0) setSponsors(d.data);
       })
-      .catch(() => {}); // silently ignore if API unavailable
+      .catch(() => {});
   }, []);
 
-  // Auto-rotate when there are multiple sponsors
   useEffect(() => {
     if (sponsors.length <= 1) return;
     const timer = setInterval(() => {
@@ -32,7 +30,6 @@ export default function SponsorBanner() {
     return () => clearInterval(timer);
   }, [sponsors.length]);
 
-  // Don't render if dismissed or no sponsors
   if (!visible || sponsors.length === 0) return null;
 
   const sp = sponsors[current];
@@ -46,12 +43,12 @@ export default function SponsorBanner() {
         borderBottom: '2px solid #d4af37',
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4 flex-wrap">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3">
 
-        {/* Left: sponsored badge + logo / name */}
-        <div className="flex items-center gap-3 min-w-0">
+        {/* Left: badge + logo + name — single row, no wrapping */}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <span
-            className="flex-shrink-0 px-2.5 py-0.5 text-xs font-bold rounded-full"
+            className="flex-shrink-0 px-2.5 py-0.5 text-xs font-bold rounded-full whitespace-nowrap"
             style={{
               background: '#d4af37',
               color: '#1a1a1a',
@@ -65,22 +62,21 @@ export default function SponsorBanner() {
             <img
               src={sp.logo_url}
               alt={sp.name}
-              className="h-8 w-auto object-contain flex-shrink-0"
-              style={{ maxWidth: '90px' }}
+              className="h-7 w-auto object-contain flex-shrink-0"
+              style={{ maxWidth: '80px' }}
             />
           )}
 
           <div className="min-w-0">
-            <p className="text-white font-bold text-sm truncate">{sp.name}</p>
+            <p className="text-white font-bold text-sm leading-tight truncate">{sp.name}</p>
             {sp.tagline && (
-              <p className="text-gray-400 text-xs truncate">{sp.tagline}</p>
+              <p className="text-gray-400 text-xs leading-tight truncate">{sp.tagline}</p>
             )}
           </div>
         </div>
 
-        {/* Right: visit website + dots (if multiple) + close */}
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Sponsor dots */}
+        {/* Right: dots (if multiple) + dismiss */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {sponsors.length > 1 && (
             <div className="flex gap-1">
               {sponsors.map((_, i) => (
@@ -96,22 +92,9 @@ export default function SponsorBanner() {
             </div>
           )}
 
-          {sp.website_url && (
-            <a
-              href={sp.website_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-1.5 text-xs font-bold rounded-md transition-all hover:scale-105 flex-shrink-0"
-              style={{ background: '#d4af37', color: '#1a1a1a' }}
-            >
-              Visit Website
-            </a>
-          )}
-
-          {/* Dismiss */}
           <button
             onClick={() => setVisible(false)}
-            className="text-gray-500 hover:text-gray-300 transition-colors text-lg leading-none flex-shrink-0"
+            className="text-gray-500 hover:text-gray-300 transition-colors text-xl leading-none"
             aria-label="Close sponsor banner"
           >
             ×

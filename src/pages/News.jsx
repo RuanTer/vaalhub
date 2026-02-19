@@ -188,8 +188,8 @@ export default function News() {
                     </div>
                   )}
 
-                  <div className="p-6 flex flex-col h-full">
-                    <div className="flex-1">
+                  <div className="p-6 flex flex-col">
+                    <div>
                       {/* Category & Area */}
                       <div className="flex flex-wrap gap-2 mb-3">
                         {article.category && (
