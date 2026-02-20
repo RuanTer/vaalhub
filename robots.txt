@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://vaalhub.co.za/sitemap.xml
+
+# Disallow admin / internal paths
+Disallow: /api/
+Disallow: /cms/

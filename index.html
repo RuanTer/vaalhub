@@ -59,8 +59,58 @@
     </script>
 
     <title>VaalHub - Local News, Events & Business | Vaal Triangle</title>
-    <script type="module" crossorigin src="/assets/index-DiqWAAua.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-CT2gUorf.js">
+
+    <!-- Organization structured data — tells Google who we are -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": "VaalHub",
+      "url": "https://vaalhub.co.za",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://vaalhub.co.za/vaalhub-logo.png",
+        "width": 1024,
+        "height": 1024
+      },
+      "sameAs": [],
+      "description": "VaalHub is the Vaal Triangle's trusted source for local news, events, and business information covering Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, and Sasolburg.",
+      "areaServed": {
+        "@type": "Place",
+        "name": "Vaal Triangle",
+        "address": {
+          "@type": "PostalAddress",
+          "addressRegion": "Gauteng / Free State",
+          "addressCountry": "ZA"
+        }
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "info@vaalhub.co.za",
+        "contactType": "customer support"
+      }
+    }
+    </script>
+
+    <!-- WebSite structured data — enables Google Sitelinks search box -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "VaalHub",
+      "url": "https://vaalhub.co.za",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://vaalhub.co.za/news?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="module" crossorigin src="/assets/index-zK1HLYKy.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-pQGKv38A.js">
     <link rel="stylesheet" crossorigin href="/assets/index-BZewkmKi.css">
   </head>
   <body>
