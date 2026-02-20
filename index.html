@@ -34,6 +34,34 @@
     <meta name="description" content="VaalHub - Your trusted source for local news, events, and business information across the Vaal Triangle. Discover Vereeniging, Vanderbijlpark, Meyerton, and more.">
     <meta name="keywords" content="Vaal Triangle, Vereeniging, Vanderbijlpark, Meyerton, local news, events, businesses, Vaal River, Sharpeville, Sasolburg">
 
+    <!--
+      GitHub Pages SPA — decode the path that was packed into ?p= by 404.html
+      and restore it to the real URL via history.replaceState before React boots.
+      This makes deep links like /news/42, /events, /businesses work correctly.
+    -->
+    <script>
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        // Decode the ?p= path injected by 404.html
+        var search = window.location.search;
+        if (search.slice(1,3) === 'p=') {
+          var decoded = search.slice(1).split('&').reduce(function(prev, curr) {
+            var parts = curr.split('=');
+            prev[decodeURIComponent(parts[0])] = parts[1] ? decodeURIComponent(parts[1].replace(/~and~/g, '&')) : '';
+            return prev;
+          }, {});
+          if (decoded.p !== undefined) {
+            var path = '/' + decoded.p + (decoded.q ? '?' + decoded.q : '');
+            window.history.replaceState(null, null, path + window.location.hash);
+          }
+        }
+      })();
+    </script>
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-VQZFG8PNVG"></script>
     <script>

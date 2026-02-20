@@ -1,137 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/vaalhub-logo.png" />
-    <link rel="apple-touch-icon" href="/vaalhub-logo.png" />
-    <link rel="shortcut icon" href="/vaalhub-logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <title>VaalHub</title>
+    <!--
+      GitHub Pages SPA redirect — when GitHub returns a 404 for a deep link like
+      /news/42 or /events, this page immediately redirects the browser to the
+      root with the original path encoded as a query-string parameter.
+      index.html then decodes it and restores the correct URL before React boots.
 
-    <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://vaalhub.co.za/" />
-    <meta property="og:title" content="VaalHub - Local News, Events & Business | Vaal Triangle" />
-    <meta property="og:description" content="VaalHub is your trusted source for local news, events, and business information across the Vaal Triangle. Discover Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, and Sasolburg." />
-    <meta property="og:image" content="https://vaalhub.co.za/vaalhub-logo.png" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="1024" />
-    <meta property="og:image:height" content="1024" />
-    <meta property="og:site_name" content="VaalHub" />
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="VaalHub - Local News, Events & Business | Vaal Triangle" />
-    <meta name="twitter:description" content="VaalHub is your trusted source for local news, events, and business information across the Vaal Triangle." />
-    <meta name="twitter:image" content="https://vaalhub.co.za/vaalhub-logo.png" />
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,700&display=swap" rel="stylesheet">
-
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="VaalHub - Your trusted source for local news, events, and business information across the Vaal Triangle. Discover Vereeniging, Vanderbijlpark, Meyerton, and more.">
-    <meta name="keywords" content="Vaal Triangle, Vereeniging, Vanderbijlpark, Meyerton, local news, events, businesses, Vaal River, Sharpeville, Sasolburg">
-
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VQZFG8PNVG"></script>
+      Based on https://github.com/rafgraph/spa-github-pages (MIT licence)
+    -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-VQZFG8PNVG');
+      // Preserve the full path + query + hash, then redirect to the root.
+      // segmentCount = 0 because vaalhub.co.za is a custom root domain (not /repo-name/).
+      var segmentCount = 0;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?p=/' +
+        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
     </script>
-
-    <!-- reCAPTCHA v3 -->
-    <script>
-      // Load reCAPTCHA script dynamically to avoid blocking
-      (function() {
-        var siteKey = 'YOUR_RECAPTCHA_SITE_KEY_HERE';
-        if (siteKey && siteKey !== 'YOUR_RECAPTCHA_SITE_KEY_HERE') {
-          var script = document.createElement('script');
-          script.src = 'https://www.google.com/recaptcha/api.js?render=' + siteKey;
-          script.async = true;
-          script.defer = true;
-          document.head.appendChild(script);
-        }
-      })();
-    </script>
-
-    <title>VaalHub - Local News, Events & Business | Vaal Triangle</title>
-
-    <!-- Organization structured data — tells Google who we are -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "NewsMediaOrganization",
-      "name": "VaalHub",
-      "url": "https://vaalhub.co.za",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://vaalhub.co.za/vaalhub-logo.png",
-        "width": 1024,
-        "height": 1024
-      },
-      "sameAs": [],
-      "description": "VaalHub is the Vaal Triangle's trusted source for local news, events, and business information covering Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, and Sasolburg.",
-      "areaServed": {
-        "@type": "Place",
-        "name": "Vaal Triangle",
-        "address": {
-          "@type": "PostalAddress",
-          "addressRegion": "Gauteng / Free State",
-          "addressCountry": "ZA"
-        }
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "info@vaalhub.co.za",
-        "contactType": "customer support"
-      }
-    }
-    </script>
-
-    <!-- WebSite structured data — enables Google Sitelinks search box -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "VaalHub",
-      "url": "https://vaalhub.co.za",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://vaalhub.co.za/news?q={search_term_string}"
-        },
-        "query-input": "required name=search_term_string"
-      }
-    }
-    </script>
-    <script type="module" crossorigin src="/assets/index-zK1HLYKy.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-pQGKv38A.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-BZewkmKi.css">
   </head>
-  <body>
-    <div id="root"></div>
-    <!-- Fallback for search crawlers that do not execute JavaScript -->
-    <noscript>
-      <h1>VaalHub – Local News, Events &amp; Business</h1>
-      <p>Your trusted source for local news, events, and business information across the Vaal Triangle, South Africa.</p>
-      <p>Discover the towns of Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, and Sasolburg.</p>
-      <ul>
-        <li><a href="/towns/vereeniging">Vereeniging</a></li>
-        <li><a href="/towns/vanderbijlpark">Vanderbijlpark</a></li>
-        <li><a href="/towns/meyerton">Meyerton</a></li>
-        <li><a href="/towns/sharpeville">Sharpeville</a></li>
-        <li><a href="/towns/sasolburg">Sasolburg</a></li>
-        <li><a href="/advertise">Advertise With Us</a></li>
-        <li><a href="/subscribe">Subscribe to Newsletter</a></li>
-        <li><a href="/contact">Contact Us</a></li>
-        <li><a href="/privacy">Privacy Policy</a></li>
-        <li><a href="/terms">Terms of Service</a></li>
-      </ul>
-    </noscript>
-  </body>
+  <body></body>
 </html>
