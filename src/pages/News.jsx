@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { buildPageMeta } from '../hooks/useSEO';
 import SponsorBanner from '../components/ui/SponsorBanner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -65,6 +67,14 @@ export default function News() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        {buildPageMeta({
+          title: 'Latest News',
+          description: 'Stay up to date with the latest local news from Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, Sasolburg and across the Vaal Triangle.',
+          path: '/news',
+        })}
+      </Helmet>
+
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-vaal-orange-500 to-vaal-orange-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

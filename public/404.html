@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>VaalHub</title>
+    <!--
+      GitHub Pages SPA redirect — when GitHub returns a 404 for a deep link like
+      /news/42 or /events, this page immediately redirects the browser to the
+      root with the original path encoded as a query-string parameter.
+      index.html then decodes it and restores the correct URL before React boots.
+
+      Based on https://github.com/rafgraph/spa-github-pages (MIT licence)
+    -->
+    <script>
+      // Preserve the full path + query + hash, then redirect to the root.
+      // segmentCount = 0 because vaalhub.co.za is a custom root domain (not /repo-name/).
+      var segmentCount = 0;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?p=/' +
+        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>

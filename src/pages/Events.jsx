@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { buildPageMeta } from '../hooks/useSEO';
 import Modal from '../components/ui/Modal';
 import SponsorBanner from '../components/ui/SponsorBanner';
 
@@ -88,6 +90,14 @@ export default function Events() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        {buildPageMeta({
+          title: 'Events in the Vaal Triangle',
+          description: 'Discover upcoming events, markets, festivals, sports, arts, and community gatherings across Vereeniging, Vanderbijlpark, Meyerton, Sasolburg and the Vaal Triangle.',
+          path: '/events',
+        })}
+      </Helmet>
+
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-vaal-orange-500 to-vaal-orange-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

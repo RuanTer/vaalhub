@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { buildPageMeta } from '../hooks/useSEO';
 import { TIMING } from '../config/constants';
+import Modal from '../components/ui/Modal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -192,6 +195,9 @@ const Home = () => {
   const [heroTouchStartX, setHeroTouchStartX] = useState(null);
   const [heroDragOffset, setHeroDragOffset] = useState(0);
 
+  // Event detail modal (card click → full detail popup, same as Events page)
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
   // Modal state
   const [showEventModal, setShowEventModal] = useState(false);
   const [showBusinessModal, setShowBusinessModal] = useState(false);
@@ -379,6 +385,12 @@ const Home = () => {
     return new Date(dateStr).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
+  // Long date format for event detail modal (matches Events page)
+  const formatEventDateLong = (dateStr) => {
+    if (!dateStr) return 'Date TBA';
+    return new Date(dateStr).toLocaleDateString('en-ZA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
   // ─── Form submit handlers ─────────────────────────────────────
   const handleEventSubmit = (e) => {
     e.preventDefault();
@@ -414,6 +426,13 @@ const Home = () => {
 
   return (
     <div>
+      <Helmet>
+        {buildPageMeta({
+          title: 'VaalHub – Local News, Events & Business',
+          description: 'VaalHub is your trusted source for local news, events, and business information across the Vaal Triangle – Vereeniging, Vanderbijlpark, Meyerton, Sharpeville and Sasolburg.',
+          path: '/',
+        })}
+      </Helmet>
 
       {/* ═══════════════════════════════════════════════════════════
           HERO CAROUSEL
@@ -554,10 +573,10 @@ const Home = () => {
 
             <CardCarousel itemCount={featuredEvents.length}>
               {featuredEvents.map((event) => (
-                <Link
+                <div
                   key={event.event_id}
-                  to="/events"
-                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group h-full"
+                  onClick={() => setSelectedEvent(event)}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group h-full cursor-pointer transform hover:-translate-y-1"
                 >
                   <div className="relative h-48 bg-gray-200 overflow-hidden">
                     {event.image_url ? (
@@ -608,8 +627,15 @@ const Home = () => {
                         <p className="text-gray-600 text-sm line-clamp-2">{event.description}</p>
                       )}
                     </div>
+                    {/* View Details button — same as Events page */}
+                    <button className="w-full mt-4 py-2 px-4 bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center">
+                      View Details
+                      <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </div>
-                </Link>
+                </div>
               ))}
             </CardCarousel>
           </div>
@@ -915,6 +941,114 @@ const Home = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          EVENT DETAIL MODAL (same layout as Events page)
+          ═══════════════════════════════════════════════════════════ */}
+      {selectedEvent && (
+        <Modal
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          title={selectedEvent.title}
+        >
+          <div className="space-y-6">
+            {/* Event Image */}
+            {selectedEvent.image_url && !selectedEvent.image_url.includes('data:image') && (
+              <div className="w-full rounded-lg overflow-hidden bg-gray-100">
+                <img
+                  src={selectedEvent.image_url}
+                  alt={selectedEvent.title}
+                  className="w-full h-auto object-contain max-h-[500px]"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+            )}
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2">
+              {selectedEvent.category && (
+                <span className="inline-block px-4 py-2 bg-vaal-orange-100 text-vaal-orange-700 text-sm font-medium rounded-full">
+                  {selectedEvent.category}
+                </span>
+              )}
+              {selectedEvent.location && (
+                <span className="inline-block px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
+                  📍 {selectedEvent.location}
+                </span>
+              )}
+            </div>
+
+            {/* Date & Time */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-vaal-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                When
+              </h4>
+              <p className="text-gray-700">
+                <strong>Date:</strong> {formatEventDateLong(selectedEvent.date_start)}
+                {selectedEvent.date_end && selectedEvent.date_end !== selectedEvent.date_start && (
+                  <span> – {formatEventDateLong(selectedEvent.date_end)}</span>
+                )}
+              </p>
+              {selectedEvent.time && (
+                <p className="text-gray-700 mt-1"><strong>Time:</strong> {selectedEvent.time}</p>
+              )}
+            </div>
+
+            {/* Description */}
+            {selectedEvent.description && (
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">About This Event</h4>
+                <p className="text-gray-700 whitespace-pre-line leading-relaxed">{selectedEvent.description}</p>
+              </div>
+            )}
+
+            {/* Organizer */}
+            {selectedEvent.organizer && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Organizer</h4>
+                <p className="text-gray-700">{selectedEvent.organizer}</p>
+              </div>
+            )}
+
+            {/* Contact Info */}
+            {selectedEvent.contact_info && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Contact Information</h4>
+                <p className="text-gray-700">{selectedEvent.contact_info}</p>
+              </div>
+            )}
+
+            {/* Price */}
+            {selectedEvent.price && (
+              <div className="bg-vaal-orange-50 rounded-lg p-4 border border-vaal-orange-200">
+                <h4 className="font-semibold text-gray-900 mb-2">Admission</h4>
+                <p className="text-gray-700 font-medium">{selectedEvent.price}</p>
+              </div>
+            )}
+
+            {/* Source link */}
+            {selectedEvent.source_url && (
+              <div className="pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-500 mb-3">Want more information from the original source?</p>
+                <a
+                  href={selectedEvent.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+                >
+                  Visit Event Source
+                  <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
+            )}
+          </div>
+        </Modal>
       )}
 
       {/* ═══════════════════════════════════════════════════════════

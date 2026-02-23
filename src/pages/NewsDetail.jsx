@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { buildArticleMeta } from '../hooks/useSEO';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -90,6 +92,9 @@ export default function NewsDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Dynamic per-article SEO: title, meta description, og tags, JSON-LD */}
+      <Helmet>{buildArticleMeta(article)}</Helmet>
+
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Back Button */}
         <button
