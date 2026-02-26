@@ -1,5 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import Layout from './components/layout/Layout';
+
+const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
 // Pages
 import Home from './pages/Home';
@@ -20,9 +23,14 @@ import Meyerton from './pages/towns/Meyerton';
 import Sharpeville from './pages/towns/Sharpeville';
 import Sasolburg from './pages/towns/Sasolburg';
 
-function App() {
+function AppInner() {
+  const location = useLocation();
+  useEffect(() => {
+    if (!GA_ID || typeof window.gtag !== 'function') return;
+    window.gtag('config', GA_ID, { page_path: location.pathname + location.search });
+  }, [location]);
+
   return (
-    <Router>
       <Layout>
         <Routes>
           {/* Home */}
@@ -61,6 +69,13 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppInner />
     </Router>
   );
 }
