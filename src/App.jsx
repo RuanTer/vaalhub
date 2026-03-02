@@ -45,7 +45,7 @@ function AppInner() {
 
           {/* News & Events */}
           <Route path="/news" element={<News />} />
-          <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/news/:slug" element={<NewsDetail />} />
           <Route path="/events" element={<Events />} />
           <Route path="/businesses" element={<Businesses />} />
           <Route path="/verify-business" element={<VerifyBusiness />} />

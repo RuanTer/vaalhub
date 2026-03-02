@@ -43,7 +43,7 @@ export function buildArticleMeta(article) {
 
   const title = `${article.headline} | VaalHub`;
   const description = toDescription(article.summary || article.full_text);
-  const url = `${SITE_URL}/news/${article.news_id}`;
+  const url = `${SITE_URL}/news/${article.slug || article.news_id}`;
   const image = article.image_url || DEFAULT_IMAGE;
   const publishDate = article.publish_date ? new Date(article.publish_date).toISOString() : undefined;
 

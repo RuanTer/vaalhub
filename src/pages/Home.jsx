@@ -670,8 +670,8 @@ const Home = () => {
             <CardCarousel itemCount={featuredNews.length}>
               {featuredNews.map((article) => (
                 <Link
-                  key={article.news_id}
-                  to={`/news/${article.news_id}`}
+                  key={article.slug || article.news_id}
+                  to={`/news/${article.slug || article.news_id}`}
                   className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100 h-full"
                 >
                   <div className="aspect-video bg-gray-200 overflow-hidden relative">

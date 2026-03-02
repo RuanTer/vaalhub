@@ -184,7 +184,7 @@ export default function News() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {news.map((article) => (
                 <article
-                  key={article.news_id}
+                  key={article.slug || article.news_id}
                   className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
                 >
                   {/* Image — always shows a placeholder; real image covers it when available */}
@@ -245,7 +245,7 @@ export default function News() {
 
                     {/* Read More Button */}
                     <Link
-                      to={`/news/${article.news_id}`}
+                      to={`/news/${article.slug || article.news_id}`}
                       className="w-full mt-4 py-2 px-4 bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center"
                     >
                       Read Full Article

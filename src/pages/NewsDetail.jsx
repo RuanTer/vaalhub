@@ -6,7 +6,7 @@ import { buildArticleMeta } from '../hooks/useSEO';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function NewsDetail() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,12 +14,12 @@ export default function NewsDetail() {
 
   useEffect(() => {
     fetchArticle();
-  }, [id]);
+  }, [slug]);
 
   const fetchArticle = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/news/${id}`);
+      const response = await fetch(`${API_URL}/api/news/${slug}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -163,7 +163,20 @@ export default function NewsDetail() {
                 .map(p => p.trim())
                 .filter(Boolean);
 
-              // Build interleaved content: paragraph → image → paragraph → image …
+              // Build interleaved content — one image after every paragraph (as available).
+              // Any extra images beyond the paragraph count are appended at the end,
+              // so ALL additional images are always shown regardless of how many there are.
+              const renderImage = (src, idx) => (
+                <figure key={`img-${idx}`} className="my-8">
+                  <img
+                    src={src}
+                    alt={`Article image ${idx + 1}`}
+                    className="w-full max-w-2xl mx-auto block rounded-lg shadow-md"
+                    onError={(e) => { e.target.closest('figure').style.display = 'none'; }}
+                  />
+                </figure>
+              );
+
               const content = [];
               paragraphs.forEach((para, i) => {
                 content.push(
@@ -171,19 +184,15 @@ export default function NewsDetail() {
                     {para}
                   </p>
                 );
-                if (extraImages[i]) {
-                  content.push(
-                    <figure key={`img-${i}`} className="my-8">
-                      <img
-                        src={extraImages[i]}
-                        alt={`Article image ${i + 1}`}
-                        className="w-full max-w-xl mx-auto block rounded-lg shadow-md"
-                        onError={(e) => { e.target.closest('figure').style.display = 'none'; }}
-                      />
-                    </figure>
-                  );
+                // Place the matching image after this paragraph
+                if (i < extraImages.length) {
+                  content.push(renderImage(extraImages[i], i));
                 }
               });
+              // Append any remaining images if there are more images than paragraphs
+              for (let i = paragraphs.length; i < extraImages.length; i++) {
+                content.push(renderImage(extraImages[i], i));
+              }
 
               return (
                 <div className="prose prose-lg max-w-none mb-8">
