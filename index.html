@@ -55,7 +55,10 @@
             return prev;
           }, {});
           if (decoded.p !== undefined) {
-            var path = '/' + decoded.p + (decoded.q ? '?' + decoded.q : '');
+            // decoded.p already starts with '/' so do not prepend another '/'
+            // e.g. decoded.p = '/news/776' → path = '/news/776'
+            // Adding '/' would make '//news/776' which is a cross-origin URL
+            var path = decoded.p + (decoded.q ? '?' + decoded.q : '');
             window.history.replaceState(null, null, path + window.location.hash);
           }
         }
