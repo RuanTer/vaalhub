@@ -148,14 +148,49 @@ export default function NewsDetail() {
             {/* Date */}
             <p className="text-gray-500 mb-6">{formatDate(article.publish_date)}</p>
 
-            {/* Full Text */}
-            {article.full_text && (
-              <div className="prose prose-lg max-w-none mb-8">
-                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {article.full_text}
+            {/* Full Text with inline additional images between paragraphs */}
+            {article.full_text && (() => {
+              // Parse the additional images JSON array (stored as a string in the DB)
+              let extraImages = [];
+              try {
+                const parsed = JSON.parse(article.additional_images || '[]');
+                if (Array.isArray(parsed)) extraImages = parsed;
+              } catch { /* no additional images */ }
+
+              // Split text into paragraphs on blank lines
+              const paragraphs = article.full_text
+                .split(/\n\n+/)
+                .map(p => p.trim())
+                .filter(Boolean);
+
+              // Build interleaved content: paragraph → image → paragraph → image …
+              const content = [];
+              paragraphs.forEach((para, i) => {
+                content.push(
+                  <p key={`p-${i}`} className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
+                    {para}
+                  </p>
+                );
+                if (extraImages[i]) {
+                  content.push(
+                    <figure key={`img-${i}`} className="my-8">
+                      <img
+                        src={extraImages[i]}
+                        alt={`Article image ${i + 1}`}
+                        className="w-full max-w-xl mx-auto block rounded-lg shadow-md"
+                        onError={(e) => { e.target.closest('figure').style.display = 'none'; }}
+                      />
+                    </figure>
+                  );
+                }
+              });
+
+              return (
+                <div className="prose prose-lg max-w-none mb-8">
+                  {content}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Source Attribution (Copyright Compliance) */}
             {article.source_url && (
