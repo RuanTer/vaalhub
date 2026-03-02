@@ -148,7 +148,7 @@ export default function NewsDetail() {
             {/* Date */}
             <p className="text-gray-500 mb-6">{formatDate(article.publish_date)}</p>
 
-            {/* Full Text with inline additional images between paragraphs */}
+            {/* Full Text with inline additional images via [IMAGE:N] tokens */}
             {article.full_text && (() => {
               // Parse the additional images JSON array (stored as a string in the DB)
               let extraImages = [];
@@ -157,15 +157,6 @@ export default function NewsDetail() {
                 if (Array.isArray(parsed)) extraImages = parsed;
               } catch { /* no additional images */ }
 
-              // Split text into paragraphs on blank lines
-              const paragraphs = article.full_text
-                .split(/\n\n+/)
-                .map(p => p.trim())
-                .filter(Boolean);
-
-              // Build interleaved content — one image after every paragraph (as available).
-              // Any extra images beyond the paragraph count are appended at the end,
-              // so ALL additional images are always shown regardless of how many there are.
               const renderImage = (src, idx) => (
                 <figure key={`img-${idx}`} className="my-8">
                   <img
@@ -177,6 +168,36 @@ export default function NewsDetail() {
                 </figure>
               );
 
+              const renderParagraphs = (text, keyPrefix) =>
+                text.split(/\n\n+/)
+                  .map(p => p.trim())
+                  .filter(Boolean)
+                  .map((para, i) => (
+                    <p key={`${keyPrefix}-${i}`} className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
+                      {para}
+                    </p>
+                  ));
+
+              // Token-based rendering: [IMAGE:1], [IMAGE:2] … placed exactly where authored
+              if (/\[IMAGE:\d+\]/.test(article.full_text)) {
+                const parts = article.full_text.split(/(\[IMAGE:\d+\])/);
+                return (
+                  <div className="prose prose-lg max-w-none mb-8">
+                    {parts.map((part, i) => {
+                      const match = part.match(/^\[IMAGE:(\d+)\]$/);
+                      if (match) {
+                        const imgIdx = parseInt(match[1]) - 1; // 1-based → 0-based
+                        const imgSrc = extraImages[imgIdx];
+                        return imgSrc ? renderImage(imgSrc, imgIdx) : null;
+                      }
+                      return renderParagraphs(part, `seg-${i}`);
+                    })}
+                  </div>
+                );
+              }
+
+              // Fallback: interleave images after paragraphs (backwards compat for older articles)
+              const paragraphs = article.full_text.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
               const content = [];
               paragraphs.forEach((para, i) => {
                 content.push(
@@ -184,21 +205,12 @@ export default function NewsDetail() {
                     {para}
                   </p>
                 );
-                // Place the matching image after this paragraph
-                if (i < extraImages.length) {
-                  content.push(renderImage(extraImages[i], i));
-                }
+                if (i < extraImages.length) content.push(renderImage(extraImages[i], i));
               });
-              // Append any remaining images if there are more images than paragraphs
               for (let i = paragraphs.length; i < extraImages.length; i++) {
                 content.push(renderImage(extraImages[i], i));
               }
-
-              return (
-                <div className="prose prose-lg max-w-none mb-8">
-                  {content}
-                </div>
-              );
+              return <div className="prose prose-lg max-w-none mb-8">{content}</div>;
             })()}
 
             {/* Source Attribution (Copyright Compliance) */}
