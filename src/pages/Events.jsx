@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { buildPageMeta, buildItemListMeta } from '../hooks/useSEO';
 import Modal from '../components/ui/Modal';
 import SponsorBanner from '../components/ui/SponsorBanner';
+import NewsletterSignupBar from '../components/ui/NewsletterSignupBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -331,6 +332,9 @@ export default function Events() {
           </>
         )}
       </div>
+
+      {/* Newsletter signup */}
+      <NewsletterSignupBar />
 
       {/* Event Detail Modal */}
       {selectedEvent && (
