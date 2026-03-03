@@ -17,37 +17,40 @@
  *     - HTTP 200 for every article URL ✅
  */
 
-const fs   = require('fs');
-const path = require('path');
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
+import { resolve, join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const distDir       = path.resolve(__dirname, '..', 'dist');
-const distIndex     = path.join(distDir, 'index.html');
-const distNewsDir   = path.join(distDir, 'news');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const distDir     = resolve(__dirname, '..', 'dist');
+const distIndex   = join(distDir, 'index.html');
+const distNewsDir = join(distDir, 'news');
 
 // ── Sanity checks ────────────────────────────────────────────────────────────
-if (!fs.existsSync(distIndex)) {
+if (!existsSync(distIndex)) {
   console.error('inject-prerenders: dist/index.html not found — run npm run build first');
   process.exit(1);
 }
-if (!fs.existsSync(distNewsDir)) {
+if (!existsSync(distNewsDir)) {
   console.log('inject-prerenders: no dist/news/ directory — nothing to do');
   process.exit(0);
 }
 
-const reactShell = fs.readFileSync(distIndex, 'utf8');
+const reactShell = readFileSync(distIndex, 'utf8');
 
 // ── Process each article directory ──────────────────────────────────────────
-const slugDirs = fs.readdirSync(distNewsDir, { withFileTypes: true })
+const slugDirs = readdirSync(distNewsDir, { withFileTypes: true })
   .filter(d => d.isDirectory())
   .map(d => d.name);
 
 let count = 0;
 
 for (const slug of slugDirs) {
-  const preRenderPath = path.join(distNewsDir, slug, 'index.html');
-  if (!fs.existsSync(preRenderPath)) continue;
+  const preRenderPath = join(distNewsDir, slug, 'index.html');
+  if (!existsSync(preRenderPath)) continue;
 
-  const preRenderHtml = fs.readFileSync(preRenderPath, 'utf8');
+  const preRenderHtml = readFileSync(preRenderPath, 'utf8');
 
   // Extract <head> content from the pre-render (our article meta tags + JSON-LD)
   const headMatch = preRenderHtml.match(/<head>([\s\S]*?)<\/head>/i);
@@ -75,7 +78,7 @@ for (const slug of slugDirs) {
     `$1\n  <!-- Article pre-render meta: ${slug} -->\n  ${articleHead}\n`
   );
 
-  fs.writeFileSync(preRenderPath, newHtml, 'utf8');
+  writeFileSync(preRenderPath, newHtml, 'utf8');
   count++;
   console.log(`  ✅ news/${slug}/`);
 }
