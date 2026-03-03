@@ -36,7 +36,7 @@ export default function NewsletterSignupBar() {
         style={{ background: 'rgba(0,0,0,0.08)' }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-6 py-10 sm:py-12">
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
         {/* ── SUCCESS STATE ─────────────────────────────────── */}
         {isSuccess ? (
@@ -116,7 +116,7 @@ export default function NewsletterSignupBar() {
               <button
                 type="submit"
                 disabled={isLoading || !email}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{
                   background: isLoading ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.28)',
                   color: '#fff',

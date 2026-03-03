@@ -100,7 +100,7 @@ export default function NewsDetail() {
       {/* Sponsor banner — full-width, consistent with Events/Businesses/News pages */}
       <SponsorBanner />
 
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -130,7 +130,7 @@ export default function NewsDetail() {
             )}
           </div>
 
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             {/* Category & Area */}
             <div className="flex flex-wrap gap-2 mb-4">
               {article.category && (
@@ -146,7 +146,7 @@ export default function NewsDetail() {
             </div>
 
             {/* Headline */}
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {article.headline}
             </h1>
 
@@ -292,11 +292,10 @@ export default function NewsDetail() {
           </div>
         </div>
 
-        {/* Newsletter signup — below article, above footer */}
-        <div className="mt-8 rounded-xl overflow-hidden shadow-sm">
-          <NewsletterSignupBar />
-        </div>
       </article>
+
+      {/* Newsletter signup — full width, below article, above footer */}
+      <NewsletterSignupBar />
     </div>
   );
 }
