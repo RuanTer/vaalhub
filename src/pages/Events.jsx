@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { buildPageMeta } from '../hooks/useSEO';
+import { buildPageMeta, buildItemListMeta } from '../hooks/useSEO';
 import Modal from '../components/ui/Modal';
 import SponsorBanner from '../components/ui/SponsorBanner';
 
@@ -93,9 +93,11 @@ export default function Events() {
       <Helmet>
         {buildPageMeta({
           title: 'Events in the Vaal Triangle',
-          description: 'Discover upcoming events, markets, festivals, sports, arts, and community gatherings across Vereeniging, Vanderbijlpark, Meyerton, Sasolburg and the Vaal Triangle.',
+          description: `Discover upcoming events, markets, festivals, sports, arts, and community gatherings across Vereeniging, Vanderbijlpark, Meyerton, Sasolburg and the Vaal Triangle.${events.length ? ` ${events.length} events listed.` : ''}`,
           path: '/events',
+          keywords: 'Vaal Triangle events, Vereeniging events, Vanderbijlpark events, Meyerton events, things to do Vaal, community events South Africa, VaalHub',
         })}
+        {buildItemListMeta(events, 'Upcoming Events – Vaal Triangle', '/events')}
       </Helmet>
 
       {/* Hero Section */}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { buildPageMeta } from '../hooks/useSEO';
+import { buildPageMeta, buildItemListMeta } from '../hooks/useSEO';
 import SponsorBanner from '../components/ui/SponsorBanner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -70,9 +70,11 @@ export default function News() {
       <Helmet>
         {buildPageMeta({
           title: 'Latest News',
-          description: 'Stay up to date with the latest local news from Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, Sasolburg and across the Vaal Triangle.',
+          description: `Stay up to date with the latest local news from Vereeniging, Vanderbijlpark, Meyerton, Sharpeville, Sasolburg and across the Vaal Triangle.${news.length ? ` ${news.length} articles available.` : ''}`,
           path: '/news',
+          keywords: 'Vaal Triangle news, Vereeniging news, Vanderbijlpark news, Meyerton news, Sasolburg news, Sharpeville news, local news South Africa, VaalHub',
         })}
+        {buildItemListMeta(news, 'Latest News – Vaal Triangle', '/news')}
       </Helmet>
 
       {/* Hero Section */}
