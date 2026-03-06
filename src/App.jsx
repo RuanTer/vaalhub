@@ -11,6 +11,10 @@ import NewsDetail from './pages/NewsDetail';
 import Events from './pages/Events';
 import Businesses from './pages/Businesses';
 import VerifyBusiness from './pages/VerifyBusiness';
+import ClaimBusiness from './pages/ClaimBusiness';
+import VerifyClaim from './pages/VerifyClaim';
+import PortalLogin from './pages/portal/Login';
+import PortalDashboard from './pages/portal/Dashboard';
 import Advertise from './pages/Advertise';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
@@ -25,50 +29,64 @@ import Sasolburg from './pages/towns/Sasolburg';
 
 function AppInner() {
   const location = useLocation();
+
+  // GA page-view tracking
   useEffect(() => {
     if (!GA_ID || typeof window.gtag !== 'function') return;
     window.gtag('config', GA_ID, { page_path: location.pathname + location.search });
   }, [location]);
 
+  // Portal routes render without the site Layout (they have their own branded header)
+  if (location.pathname.startsWith('/portal')) {
+    return (
+      <Routes>
+        <Route path="/portal" element={<PortalLogin />} />
+        <Route path="/portal/dashboard" element={<PortalDashboard />} />
+      </Routes>
+    );
+  }
+
   return (
-      <Layout>
-        <Routes>
-          {/* Home */}
-          <Route path="/" element={<Home />} />
+    <Layout>
+      <Routes>
+        {/* Home */}
+        <Route path="/" element={<Home />} />
 
-          {/* Town Pages */}
-          <Route path="/towns/vereeniging" element={<Vereeniging />} />
-          <Route path="/towns/vanderbijlpark" element={<Vanderbijlpark />} />
-          <Route path="/towns/meyerton" element={<Meyerton />} />
-          <Route path="/towns/sharpeville" element={<Sharpeville />} />
-          <Route path="/towns/sasolburg" element={<Sasolburg />} />
+        {/* Town Pages */}
+        <Route path="/towns/vereeniging" element={<Vereeniging />} />
+        <Route path="/towns/vanderbijlpark" element={<Vanderbijlpark />} />
+        <Route path="/towns/meyerton" element={<Meyerton />} />
+        <Route path="/towns/sharpeville" element={<Sharpeville />} />
+        <Route path="/towns/sasolburg" element={<Sasolburg />} />
 
-          {/* News & Events */}
-          <Route path="/news" element={<News />} />
-          <Route path="/news/:slug" element={<NewsDetail />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/businesses" element={<Businesses />} />
-          <Route path="/verify-business" element={<VerifyBusiness />} />
+        {/* News & Events */}
+        <Route path="/news" element={<News />} />
+        <Route path="/news/:slug" element={<NewsDetail />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/businesses" element={<Businesses />} />
+        <Route path="/verify-business" element={<VerifyBusiness />} />
+        <Route path="/claim-business" element={<ClaimBusiness />} />
+        <Route path="/verify-claim" element={<VerifyClaim />} />
 
-          {/* Placeholder routes - to be built */}
-          <Route path="/explore" element={<Home />} />
-          <Route path="/towns" element={<Home />} />
-          <Route path="/things-to-do" element={<Home />} />
-          <Route path="/restaurants" element={<Home />} />
-          <Route path="/business" element={<Businesses />} />
-          <Route path="/living" element={<Home />} />
-          <Route path="/about" element={<Home />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/advertise" element={<Advertise />} />
-          <Route path="/subscribe" element={<Subscribe />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/submit-news" element={<Home />} />
+        {/* Placeholder routes - to be built */}
+        <Route path="/explore" element={<Home />} />
+        <Route path="/towns" element={<Home />} />
+        <Route path="/things-to-do" element={<Home />} />
+        <Route path="/restaurants" element={<Home />} />
+        <Route path="/business" element={<Businesses />} />
+        <Route path="/living" element={<Home />} />
+        <Route path="/about" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/advertise" element={<Advertise />} />
+        <Route path="/subscribe" element={<Subscribe />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/submit-news" element={<Home />} />
 
-          {/* 404 Not Found - Catch all unmatched routes */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
+        {/* 404 Not Found - Catch all unmatched routes */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Layout>
   );
 }
 
