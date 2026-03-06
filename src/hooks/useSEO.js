@@ -278,14 +278,14 @@ export function buildEventMeta(event) {
 
 // ── Business SEO ──────────────────────────────────────────────────────────
 
-export function buildBusinessMeta(business) {
+export function buildBusinessMeta(business, overrideUrl) {
   if (!business) return [];
 
   const name = business.name || business.business_name;
   const title = `${name} | VaalHub Business Directory`;
   const description = toDescription(business.description || `${name} — local business in the Vaal Triangle.`);
-  const url = `${SITE_URL}/businesses`;
-  const image = business.logo_url || DEFAULT_IMAGE;
+  const url = overrideUrl || `${SITE_URL}/businesses`;
+  const image = business.logo_url ? (business.logo_url.startsWith('http') ? business.logo_url : `${SITE_URL}${business.logo_url}`) : DEFAULT_IMAGE;
   const keywords = buildKeywords({ ...business, headline: name });
 
   const schema = {

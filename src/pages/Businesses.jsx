@@ -437,13 +437,25 @@ export default function Businesses() {
                       </div>
                     </div>
 
-                    {/* View Details Button */}
-                    <button className="w-full mt-4 py-2 px-4 bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center">
-                      View Details
-                      <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
+                    {/* Action buttons */}
+                    <div className="mt-4 flex gap-2">
+                      <button className="flex-1 py-2 px-3 bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center text-sm">
+                        Quick View
+                        <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      <Link
+                        to={`/businesses/${business.business_id}`}
+                        onClick={e => e.stopPropagation()}
+                        className="py-2 px-3 border border-vaal-orange-400 text-vaal-orange-600 hover:bg-vaal-orange-50 font-medium rounded-lg transition-colors duration-200 flex items-center text-sm"
+                        title="Open full business page"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -724,6 +736,20 @@ export default function Businesses() {
                   </a>
                 </p>
               )}
+            </div>
+
+            {/* Full page link */}
+            <div className="pt-2 border-t border-gray-100">
+              <Link
+                to={`/businesses/${selectedBusiness.business_id}`}
+                onClick={closeBusinessModal}
+                className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-vaal-orange-600 transition"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                View full business page
+              </Link>
             </div>
           </div>
         </Modal>

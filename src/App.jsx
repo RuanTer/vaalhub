@@ -13,6 +13,7 @@ import Businesses from './pages/Businesses';
 import ClaimBusiness from './pages/ClaimBusiness';
 import VerifyClaim from './pages/VerifyClaim';
 import AddBusiness from './pages/AddBusiness';
+import BusinessDetail from './pages/BusinessDetail';
 import PortalLogin from './pages/portal/Login';
 import PortalDashboard from './pages/portal/Dashboard';
 import PortalForgotPassword from './pages/portal/ForgotPassword';
@@ -68,6 +69,8 @@ function AppInner() {
         <Route path="/news/:slug" element={<NewsDetail />} />
         <Route path="/events" element={<Events />} />
         <Route path="/businesses" element={<Businesses />} />
+        <Route path="/businesses/:id" element={<BusinessDetail />} />
+        <Route path="/businesses/:id/:slug" element={<BusinessDetail />} />
         <Route path="/claim-business" element={<ClaimBusiness />} />
         <Route path="/verify-claim" element={<VerifyClaim />} />
         <Route path="/add-business" element={<AddBusiness />} />
