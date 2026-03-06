@@ -226,7 +226,7 @@ const Home = () => {
       highlight: 'Reach Local Customers',
       description: 'Connect with thousands of local residents and grow your business in the Vaal Triangle community.',
       image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200',
-      buttons: [{ text: 'Get Started', link: '/advertise', primary: true }, { text: 'Add Your Business', link: '/verify-business', primary: false }],
+      buttons: [{ text: 'Get Started', link: '/advertise', primary: true }, { text: 'Add Your Business', link: '/add-business', primary: false }],
       duration: 4000,
       display_order: 99,
     },

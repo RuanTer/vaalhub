@@ -17,6 +17,35 @@ export default function ClaimBusiness() {
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [message, setMessage] = useState('');
 
+  // If no business ID in URL, show a friendly redirect message immediately
+  if (!businessId) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-white rounded-2xl shadow-md p-10">
+            <div className="flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mx-auto mb-4">
+              <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Find your business first</h2>
+            <p className="text-gray-600 mb-8">
+              To claim a listing, open a business from the directory and click{' '}
+              <span className="font-semibold text-gray-800">"Claim this listing →"</span>{' '}
+              at the bottom of the details panel.
+            </p>
+            <Link
+              to="/businesses"
+              className="inline-block bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors duration-200"
+            >
+              Browse Businesses →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

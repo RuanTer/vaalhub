@@ -13,7 +13,14 @@ const Header = () => {
     { name: 'Home', href: '/' },
     { name: 'News', href: '/news' },
     { name: 'Events', href: '/events' },
-    { name: 'Businesses', href: '/businesses' },
+    {
+      name: 'Businesses',
+      href: '/businesses',
+      submenu: [
+        { name: 'Browse Businesses', href: '/businesses' },
+        { name: '+ Add Your Business', href: '/add-business' },
+      ],
+    },
     { name: 'Towns', href: '/towns', submenu: TOWNS.map(town => ({
       name: town.name,
       href: town.path,
@@ -77,19 +84,28 @@ const Header = () => {
               <div key={item.name} className="relative group">
                 <Link
                   to={item.href}
-                  className="text-gray-700 hover:text-vaal-orange-500 font-medium transition-colors duration-200"
+                  className="inline-flex items-center gap-1 text-gray-700 hover:text-vaal-orange-500 font-medium transition-colors duration-200"
                 >
                   {item.name}
                   {item.comingSoon && <span className="ml-2 text-xs text-gray-400">(Coming Soon)</span>}
+                  {item.submenu && (
+                    <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-vaal-orange-400 transition-colors mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
                 </Link>
                 {item.submenu && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="py-2">
+                  <div className="absolute left-0 mt-2 w-52 bg-white shadow-lg rounded-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className="py-1.5">
                       {item.submenu.map((subitem) => (
                         <Link
                           key={subitem.name}
                           to={subitem.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-vaal-orange-50 hover:text-vaal-orange-600"
+                          className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                            subitem.name.startsWith('+')
+                              ? 'text-vaal-orange-600 hover:bg-vaal-orange-50 hover:text-vaal-orange-700'
+                              : 'text-gray-700 hover:bg-gray-50 hover:text-vaal-orange-600'
+                          }`}
                         >
                           {subitem.name}
                         </Link>
@@ -135,12 +151,16 @@ const Header = () => {
                   {item.comingSoon && <span className="ml-2 text-xs text-gray-400">(Coming Soon)</span>}
                 </Link>
                 {item.submenu && (
-                  <div className="pl-6 space-y-1">
+                  <div className="pl-6 space-y-0.5 mb-1">
                     {item.submenu.map((subitem) => (
                       <Link
                         key={subitem.name}
                         to={subitem.href}
-                        className="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-vaal-orange-500 hover:bg-gray-50"
+                        className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          subitem.name.startsWith('+')
+                            ? 'text-vaal-orange-600 hover:text-vaal-orange-700 hover:bg-vaal-orange-50'
+                            : 'text-gray-600 hover:text-vaal-orange-500 hover:bg-gray-50'
+                        }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         {subitem.name}

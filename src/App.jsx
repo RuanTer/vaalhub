@@ -10,11 +10,13 @@ import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import Events from './pages/Events';
 import Businesses from './pages/Businesses';
-import VerifyBusiness from './pages/VerifyBusiness';
 import ClaimBusiness from './pages/ClaimBusiness';
 import VerifyClaim from './pages/VerifyClaim';
+import AddBusiness from './pages/AddBusiness';
 import PortalLogin from './pages/portal/Login';
 import PortalDashboard from './pages/portal/Dashboard';
+import PortalForgotPassword from './pages/portal/ForgotPassword';
+import PortalResetPassword from './pages/portal/ResetPassword';
 import Advertise from './pages/Advertise';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
@@ -42,6 +44,8 @@ function AppInner() {
       <Routes>
         <Route path="/portal" element={<PortalLogin />} />
         <Route path="/portal/dashboard" element={<PortalDashboard />} />
+        <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
+        <Route path="/portal/reset-password" element={<PortalResetPassword />} />
       </Routes>
     );
   }
@@ -64,9 +68,9 @@ function AppInner() {
         <Route path="/news/:slug" element={<NewsDetail />} />
         <Route path="/events" element={<Events />} />
         <Route path="/businesses" element={<Businesses />} />
-        <Route path="/verify-business" element={<VerifyBusiness />} />
         <Route path="/claim-business" element={<ClaimBusiness />} />
         <Route path="/verify-claim" element={<VerifyClaim />} />
+        <Route path="/add-business" element={<AddBusiness />} />
 
         {/* Placeholder routes - to be built */}
         <Route path="/explore" element={<Home />} />

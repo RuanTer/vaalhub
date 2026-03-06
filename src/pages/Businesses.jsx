@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { buildPageMeta } from '../hooks/useSEO';
 import Modal from '../components/ui/Modal';
@@ -70,7 +71,7 @@ export default function Businesses() {
 
       // Client-side verified filter (API doesn't support this param)
       if (filters.verifiedOnly) {
-        newItems = newItems.filter(b => b.is_verified == 1);
+        newItems = newItems.filter(b => b.is_verified === 1);
       }
 
       if (replace || currentOffset === 0) {
@@ -224,6 +225,35 @@ export default function Businesses() {
           </div>
         </div>
 
+        {/* Add Your Business banner */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-vaal-orange-500 to-vaal-orange-600 rounded-xl px-6 py-5 mb-8 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-white text-sm sm:text-base leading-tight">
+                Can't find your business?
+              </p>
+              <p className="text-white/80 text-xs sm:text-sm mt-0.5">
+                Get listed for free and reach thousands of Vaal Triangle locals.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/add-business"
+            className="flex-shrink-0 inline-flex items-center gap-2 bg-white text-vaal-orange-600 hover:bg-vaal-orange-50 font-semibold text-sm py-2.5 px-5 rounded-lg transition-colors duration-200 shadow-sm whitespace-nowrap"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Your Business
+          </Link>
+        </div>
+
         {/* Loading State */}
         {loading && (
           <div className="text-center py-12">
@@ -282,34 +312,47 @@ export default function Businesses() {
                   className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-1 flex flex-col"
                 >
                   {/* Business Logo/Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-vaal-orange-50 to-vaal-orange-100 overflow-hidden flex items-center justify-center p-6">
+                  <div className="relative h-48 overflow-hidden bg-gray-100">
                     {business.logo_url ? (
-                      <img
-                        src={business.logo_url}
-                        alt={business.business_name}
-                        className="max-h-full max-w-full object-contain"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <svg
-                        className="w-20 h-20 text-vaal-orange-300"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      <>
+                        {/* Blurred backdrop — fills the space so the card looks full */}
+                        <img
+                          src={business.logo_url}
+                          aria-hidden="true"
+                          className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-50"
+                          onError={(e) => { e.target.style.display = 'none'; }}
                         />
-                      </svg>
+                        {/* Sharp logo — mix-blend-multiply removes white backgrounds so the backdrop shows through */}
+                        <img
+                          src={business.logo_url}
+                          alt={business.business_name}
+                          className="relative z-10 w-full h-full object-contain mix-blend-multiply"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.previousSibling.style.display = 'none';
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-vaal-orange-50 to-vaal-orange-100 flex items-center justify-center">
+                        <svg
+                          className="w-20 h-20 text-vaal-orange-300"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          />
+                        </svg>
+                      </div>
                     )}
 
                     {/* Verified Badge */}
-                    {business.is_verified == 1 && (
+                    {business.is_verified === 1 && (
                       <div className="absolute top-3 right-3 bg-blue-600 text-white px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
                         <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                           <path
@@ -450,13 +493,22 @@ export default function Businesses() {
           <div className="space-y-6">
             {/* Business Logo */}
             {selectedBusiness.logo_url && (
-              <div className="w-full rounded-lg overflow-hidden bg-gradient-to-br from-vaal-orange-50 to-vaal-orange-100 flex items-center justify-center p-8">
+              <div className="relative w-full h-56 rounded-xl overflow-hidden bg-gray-100">
+                {/* Blurred backdrop */}
+                <img
+                  src={selectedBusiness.logo_url}
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-50"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                {/* Sharp logo — mix-blend-multiply removes white backgrounds */}
                 <img
                   src={selectedBusiness.logo_url}
                   alt={selectedBusiness.business_name}
-                  className="w-full h-auto object-contain max-h-[300px]"
+                  className="relative z-10 w-full h-full object-contain mix-blend-multiply"
                   onError={(e) => {
                     e.target.style.display = 'none';
+                    e.target.previousSibling.style.display = 'none';
                   }}
                 />
               </div>
@@ -474,7 +526,7 @@ export default function Businesses() {
                   📍 {selectedBusiness.location}
                 </span>
               )}
-              {selectedBusiness.is_verified == 1 && (
+              {selectedBusiness.is_verified === 1 && (
                 <div className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path
@@ -654,7 +706,7 @@ export default function Businesses() {
 
             {/* Claim this listing */}
             <div className="border-t border-gray-100 pt-4 text-center">
-              {selectedBusiness.is_verified == 1 ? (
+              {selectedBusiness.is_verified === 1 ? (
                 <p className="text-sm text-green-600 font-medium flex items-center justify-center gap-1.5">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
