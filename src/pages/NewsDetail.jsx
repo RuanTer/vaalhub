@@ -7,6 +7,64 @@ import NewsletterSignupBar from '../components/ui/NewsletterSignupBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+function getYouTubeEmbedUrl(url) {
+  // https://www.youtube.com/watch?v=ID  or  https://youtu.be/ID  or  https://youtube.com/shorts/ID
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/,
+  ];
+  for (const re of patterns) {
+    const m = url.match(re);
+    if (m) return `https://www.youtube.com/embed/${m[1]}?rel=0`;
+  }
+  return null;
+}
+
+function getVimeoEmbedUrl(url) {
+  const m = url.match(/vimeo\.com\/(\d+)/);
+  return m ? `https://player.vimeo.com/video/${m[1]}` : null;
+}
+
+function VideoPlayer({ url }) {
+  const ytEmbed = getYouTubeEmbedUrl(url);
+  if (ytEmbed) {
+    return (
+      <div className="my-6 rounded-xl overflow-hidden shadow-md aspect-video">
+        <iframe
+          src={ytEmbed}
+          title="Article video"
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+  const vimeoEmbed = getVimeoEmbedUrl(url);
+  if (vimeoEmbed) {
+    return (
+      <div className="my-6 rounded-xl overflow-hidden shadow-md aspect-video">
+        <iframe
+          src={vimeoEmbed}
+          title="Article video"
+          className="w-full h-full"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+  // Direct MP4 fallback
+  if (/\.mp4(\?|$)/i.test(url)) {
+    return (
+      <div className="my-6">
+        <video controls className="w-full rounded-xl shadow-md max-h-96">
+          <source src={url} type="video/mp4" />
+        </video>
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function NewsDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -152,6 +210,9 @@ export default function NewsDetail() {
 
             {/* Date */}
             <p className="text-gray-500 mb-6">{formatDate(article.publish_date)}</p>
+
+            {/* Embedded Video */}
+            {article.video_url && <VideoPlayer url={article.video_url} />}
 
             {/* Full Text with inline additional images via [IMAGE:N] tokens */}
             {article.full_text && (() => {
