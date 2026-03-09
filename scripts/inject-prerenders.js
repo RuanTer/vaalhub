@@ -1,20 +1,24 @@
 #!/usr/bin/env node
 /**
- * Post-build: inject article-specific meta tags from pre-renders into
- * the Vite-built React shell (dist/index.html), writing the result to
- * each dist/news/{slug}/index.html.
+ * Post-build: inject page-specific meta tags from pre-renders into
+ * the Vite-built React shell (dist/index.html).
+ *
+ * Handles two page types:
+ *   • dist/news/{slug}/index.html         (articles)
+ *   • dist/businesses/{id}/{slug}/index.html  (business profiles)
  *
  * WHY:
- *   The pre-render files in public/news/{slug}/index.html contain all
- *   article-specific meta tags + JSON-LD.  Vite copies them to dist/
- *   as-is, but they have no React app — Googlebot would see a blank shell.
+ *   Pre-render files contain page-specific meta tags + JSON-LD.  Vite copies
+ *   them to dist/ as-is, but they have no React app — Googlebot would see a
+ *   blank shell and social media crawlers would show generic VaalHub branding.
  *
- *   This script REPLACES each dist/news/{slug}/index.html with a copy of
- *   dist/index.html (the full React SPA shell) that has the article meta
- *   tags injected into <head>.  Result:
- *     - Googlebot reads article title, description, og:* and JSON-LD ✅
- *     - React Router renders the article at the correct URL (no redirect) ✅
- *     - HTTP 200 for every article URL ✅
+ *   This script REPLACES each file with a copy of dist/index.html (the full
+ *   React SPA shell) that has the page-specific meta tags injected into <head>.
+ *
+ *   Result for every pre-rendered URL:
+ *     - Crawler reads correct title, description, og:image, JSON-LD  ✅
+ *     - React Router renders the page for human visitors              ✅
+ *     - HTTP 200 — no redirects                                       ✅
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
@@ -22,65 +26,112 @@ import { resolve, join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const distDir   = resolve(__dirname, '..', 'dist');
+const distIndex = join(distDir, 'index.html');
 
-const distDir     = resolve(__dirname, '..', 'dist');
-const distIndex   = join(distDir, 'index.html');
-const distNewsDir = join(distDir, 'news');
-
-// ── Sanity checks ────────────────────────────────────────────────────────────
+// ── Sanity check ─────────────────────────────────────────────────────────────
 if (!existsSync(distIndex)) {
   console.error('inject-prerenders: dist/index.html not found — run npm run build first');
   process.exit(1);
 }
-if (!existsSync(distNewsDir)) {
-  console.log('inject-prerenders: no dist/news/ directory — nothing to do');
-  process.exit(0);
-}
 
 const reactShell = readFileSync(distIndex, 'utf8');
 
-// ── Process each article directory ──────────────────────────────────────────
-const slugDirs = readdirSync(distNewsDir, { withFileTypes: true })
-  .filter(d => d.isDirectory())
-  .map(d => d.name);
-
-let count = 0;
-
-for (const slug of slugDirs) {
-  const preRenderPath = join(distNewsDir, slug, 'index.html');
-  if (!existsSync(preRenderPath)) continue;
+// ── Core injector ─────────────────────────────────────────────────────────────
+/**
+ * Read a pre-render file, extract its <head> content, and write a new file
+ * that is the React shell with those meta tags prepended inside <head>.
+ *
+ * @param {string} preRenderPath  Full path to the existing pre-render file
+ * @param {string} label          Human-readable label for logging (e.g. "news/my-article")
+ * @returns {boolean}  true if processed, false if skipped
+ */
+function injectPrerender(preRenderPath, label) {
+  if (!existsSync(preRenderPath)) return false;
 
   const preRenderHtml = readFileSync(preRenderPath, 'utf8');
 
-  // Extract <head> content from the pre-render (our article meta tags + JSON-LD)
   const headMatch = preRenderHtml.match(/<head>([\s\S]*?)<\/head>/i);
   if (!headMatch) {
-    console.warn(`  SKIP (no <head>): news/${slug}/index.html`);
-    continue;
+    console.warn(`  SKIP (no <head>): ${label}`);
+    return false;
   }
 
-  let articleHead = headMatch[1]
-    // Strip the sessionStorage redirect script (safety — shouldn't be there anymore)
+  let pageHead = headMatch[1]
+    // Strip legacy sessionStorage redirect script (shouldn't appear in new files)
     .replace(/<script>[\s\S]*?sessionStorage\.redirect[\s\S]*?<\/script>/gi, '')
-    // Strip charset + viewport — already in dist/index.html, avoid duplication
+    // Strip charset + viewport — already in the React shell
     .replace(/<meta\s+charset[^>]*>/gi, '')
     .replace(/<meta\s+name=["']viewport["'][^>]*>/gi, '')
     .trim();
 
-  if (!articleHead) {
-    console.warn(`  SKIP (empty head after strip): news/${slug}/index.html`);
-    continue;
+  if (!pageHead) {
+    console.warn(`  SKIP (empty head after strip): ${label}`);
+    return false;
   }
 
-  // Inject article meta tags immediately after the opening <head> tag in the React shell
   const newHtml = reactShell.replace(
     /(<head>)/i,
-    `$1\n  <!-- Article pre-render meta: ${slug} -->\n  ${articleHead}\n`
+    `$1\n  <!-- Pre-render meta: ${label} -->\n  ${pageHead}\n`
   );
 
   writeFileSync(preRenderPath, newHtml, 'utf8');
-  count++;
-  console.log(`  ✅ news/${slug}/`);
+  return true;
 }
 
-console.log(`\ninject-prerenders: done — ${count}/${slugDirs.length} pages enriched`);
+// ── Process news articles ─────────────────────────────────────────────────────
+let newsCount = 0;
+let newsTotal = 0;
+
+const distNewsDir = join(distDir, 'news');
+if (existsSync(distNewsDir)) {
+  const slugDirs = readdirSync(distNewsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  newsTotal = slugDirs.length;
+  for (const slug of slugDirs) {
+    const path = join(distNewsDir, slug, 'index.html');
+    if (injectPrerender(path, `news/${slug}`)) {
+      newsCount++;
+      console.log(`  ✅ news/${slug}/`);
+    }
+  }
+} else {
+  console.log('inject-prerenders: no dist/news/ directory — skipping articles');
+}
+
+// ── Process business profiles ─────────────────────────────────────────────────
+let bizCount = 0;
+let bizTotal = 0;
+
+const distBizDir = join(distDir, 'businesses');
+if (existsSync(distBizDir)) {
+  // Structure: dist/businesses/{id}/{slug}/index.html
+  const idDirs = readdirSync(distBizDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  for (const bizId of idDirs) {
+    const idPath = join(distBizDir, bizId);
+    const slugDirs = readdirSync(idPath, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name);
+
+    bizTotal += slugDirs.length;
+    for (const slug of slugDirs) {
+      const path = join(idPath, slug, 'index.html');
+      if (injectPrerender(path, `businesses/${bizId}/${slug}`)) {
+        bizCount++;
+        console.log(`  ✅ businesses/${bizId}/${slug}/`);
+      }
+    }
+  }
+} else {
+  console.log('inject-prerenders: no dist/businesses/ directory — skipping business profiles');
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────────
+console.log(`\ninject-prerenders: done`);
+console.log(`  Articles  : ${newsCount}/${newsTotal} enriched`);
+console.log(`  Businesses: ${bizCount}/${bizTotal} enriched`);

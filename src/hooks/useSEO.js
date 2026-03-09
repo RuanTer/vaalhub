@@ -278,43 +278,81 @@ export function buildEventMeta(event) {
 
 // ── Business SEO ──────────────────────────────────────────────────────────
 
+/** Resolve a possibly-relative URL to a full absolute URL */
+function absoluteUrl(rawUrl) {
+  if (!rawUrl) return null;
+  return rawUrl.startsWith('http') ? rawUrl : `${SITE_URL}${rawUrl}`;
+}
+
 export function buildBusinessMeta(business, overrideUrl) {
   if (!business) return [];
 
   const name = business.name || business.business_name;
   const title = `${name} | VaalHub Business Directory`;
-  const description = toDescription(business.description || `${name} — local business in the Vaal Triangle.`);
+
+  // Build a rich description: use provided description or synthesise one
+  const rawDesc = business.description
+    || `${name} is a local ${business.category || 'business'} based in ${business.area || 'the Vaal Triangle'}. Find contact details, hours and more on VaalHub.`;
+  const description = toDescription(rawDesc);
+
   const url = overrideUrl || `${SITE_URL}/businesses`;
-  const image = business.logo_url ? (business.logo_url.startsWith('http') ? business.logo_url : `${SITE_URL}${business.logo_url}`) : DEFAULT_IMAGE;
+
+  // Prefer the business logo; fall back to the VaalHub default banner
+  const image = absoluteUrl(business.logo_url) || DEFAULT_IMAGE;
   const keywords = buildKeywords({ ...business, headline: name });
+
+  // Collect all online profiles into sameAs (deduped, truthy only)
+  const sameAsSet = new Set(
+    [business.website, business.facebook, business.instagram, business.source_url]
+      .map(u => absoluteUrl(u))
+      .filter(Boolean)
+  );
+  const sameAs = [...sameAsSet];
+
+  // Address region: Sasolburg is Free State, everything else is Gauteng
+  const addressRegion = (business.area === 'Sasolburg' || business.location === 'Sasolburg')
+    ? 'Free State'
+    : 'Gauteng';
 
   const schema = {
     '@context': 'https://schema.org',
     '@type': mapBusinessCategory(business.category),
+    '@id': url,                              // canonical identifier for this entity
     name,
     description,
     url: business.website || business.source_url || url,
-    image: image ? [image] : undefined,
+    image: image ? { '@type': 'ImageObject', url: image, caption: `${name} logo` } : undefined,
     ...(business.phone   && { telephone: business.phone }),
     ...(business.email   && { email: business.email }),
-    ...(business.website && { sameAs: [business.website] }),
+    ...(sameAs.length    && { sameAs }),
     address: {
       '@type': 'PostalAddress',
-      streetAddress: business.address || '',
-      addressLocality: business.area || 'Vaal Triangle',
-      addressRegion: 'Gauteng',
-      addressCountry: 'ZA',
+      streetAddress:   business.address || '',
+      addressLocality: business.area || business.location || 'Vaal Triangle',
+      addressRegion,
+      addressCountry:  'ZA',
     },
     ...(business.operating_hours && { openingHours: business.operating_hours }),
-    ...(business.google_rating    && { aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: business.google_rating,
-      reviewCount: business.google_review_count || 1,
-    }}),
+    ...(business.google_rating && {
+      aggregateRating: {
+        '@type':       'AggregateRating',
+        ratingValue:   String(business.google_rating),
+        reviewCount:   String(business.google_review_count || 1),
+        bestRating:    '5',
+        worstRating:   '1',
+      },
+    }),
     areaServed: {
       '@type': 'Place',
       name: business.area || 'Vaal Triangle',
+      address: {
+        '@type':          'PostalAddress',
+        addressLocality:  business.area || 'Vaal Triangle',
+        addressRegion,
+        addressCountry:   'ZA',
+      },
     },
+    currenciesAccepted: 'ZAR',
     inLanguage: 'en-ZA',
   };
 
@@ -330,16 +368,23 @@ export function buildBusinessMeta(business, overrideUrl) {
     e('meta', { key: 'keywords', name: 'keywords',        content: keywords }),
     e('meta', { key: 'robots',   name: 'robots',          content: 'index, follow' }),
     e('link', { key: 'canonical', rel: 'canonical',        href: url }),
+    // Open Graph — 'website' is the safest type; bots respect it universally
     e('meta', { key: 'og:type',        property: 'og:type',        content: 'website' }),
     e('meta', { key: 'og:url',         property: 'og:url',         content: url }),
     e('meta', { key: 'og:title',       property: 'og:title',       content: title }),
     e('meta', { key: 'og:description', property: 'og:description', content: description }),
     e('meta', { key: 'og:image',       property: 'og:image',       content: image }),
+    e('meta', { key: 'og:image:alt',   property: 'og:image:alt',   content: `${name} logo` }),
+    e('meta', { key: 'og:site_name',   property: 'og:site_name',   content: SITE_NAME }),
     e('meta', { key: 'og:locale',      property: 'og:locale',      content: 'en_ZA' }),
-    e('meta', { key: 'tw:card',  name: 'twitter:card',        content: 'summary_large_image' }),
-    e('meta', { key: 'tw:title', name: 'twitter:title',       content: title }),
-    e('meta', { key: 'tw:desc',  name: 'twitter:description', content: description }),
-    e('meta', { key: 'tw:image', name: 'twitter:image',       content: image }),
+    // Twitter / X card
+    e('meta', { key: 'tw:card',      name: 'twitter:card',        content: 'summary_large_image' }),
+    e('meta', { key: 'tw:site',      name: 'twitter:site',        content: TWITTER_HANDLE }),
+    e('meta', { key: 'tw:title',     name: 'twitter:title',       content: title }),
+    e('meta', { key: 'tw:desc',      name: 'twitter:description', content: description }),
+    e('meta', { key: 'tw:image',     name: 'twitter:image',       content: image }),
+    e('meta', { key: 'tw:image:alt', name: 'twitter:image:alt',   content: `${name} logo` }),
+    // JSON-LD
     jsonLd(schema,     'json-ld-business'),
     jsonLd(crumbSchema,'json-ld-breadcrumb'),
   ];
@@ -374,16 +419,24 @@ export function buildItemListSchema(items = [], listName, listUrl) {
     name: listName,
     url: `${SITE_URL}${listUrl}`,
     numberOfItems: items.length,
-    itemListElement: items.slice(0, 50).map((item, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: item.headline || item.title || item.name || item.business_name || '',
-      url: item.slug
-        ? `${SITE_URL}/news/${item.slug}`
-        : item.event_id
-          ? `${SITE_URL}/events`
-          : `${SITE_URL}/businesses`,
-    })),
+    itemListElement: items.slice(0, 50).map((item, i) => {
+      let itemUrl;
+      if (item.slug) {
+        itemUrl = `${SITE_URL}/news/${item.slug}`;
+      } else if (item.business_id) {
+        const bizSlug = (item.business_name || item.name || '')
+          .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        itemUrl = `${SITE_URL}/businesses/${item.business_id}/${bizSlug}`;
+      } else {
+        itemUrl = `${SITE_URL}/businesses`;
+      }
+      return {
+        '@type': 'ListItem',
+        position: i + 1,
+        name: item.headline || item.title || item.name || item.business_name || '',
+        url: itemUrl,
+      };
+    }),
   };
 }
 

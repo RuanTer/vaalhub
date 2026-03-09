@@ -1,86 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+<!--
+  VaalHub Sitemap Index
+  ─────────────────────
+  • sitemap-static.xml   — core & town pages (this repo, static)
+  • /api/sitemap.xml     — all published businesses + recent articles (live, from API)
 
-  <!-- Core pages -->
-  <url>
-    <loc>https://vaalhub.co.za/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/news</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/events</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/businesses</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
+  Google Search Console: submit https://vaalhub.co.za/sitemap.xml
+-->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Town pages -->
-  <url>
-    <loc>https://vaalhub.co.za/towns/vereeniging</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/towns/vanderbijlpark</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/towns/meyerton</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/towns/sharpeville</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/towns/sasolburg</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <!-- Static pages: home, news, events, businesses, towns, info -->
+  <sitemap>
+    <loc>https://vaalhub.co.za/sitemap-static.xml</loc>
+  </sitemap>
 
-  <!-- Info pages -->
-  <url>
-    <loc>https://vaalhub.co.za/advertise</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/subscribe</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/contact</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/verify-business</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/privacy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://vaalhub.co.za/terms</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
+  <!-- Dynamic pages: every published business profile + 500 recent articles -->
+  <!-- Served live from the VaalHub API — updates without a redeploy -->
+  <sitemap>
+    <loc>https://vaalhub-api-production.up.railway.app/api/sitemap.xml</loc>
+  </sitemap>
 
-</urlset>
+</sitemapindex>

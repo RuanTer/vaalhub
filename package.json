@@ -8,7 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "prerenders": "node scripts/generate-business-prerenders.js",
+    "postbuild": "node scripts/inject-prerenders.js",
+    "build:full": "npm run prerenders && npm run build",
+    "deploy": "npm run build:full && gh-pages -d dist"
   },
   "dependencies": {
     "react": "^19.2.0",
