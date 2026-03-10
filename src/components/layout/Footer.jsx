@@ -38,6 +38,7 @@ const Footer = () => {
               <li><Link to="/advertise" className="hover:text-vaal-orange-400 transition-colors">Advertise With Us</Link></li>
               <li><Link to="/contact" className="hover:text-vaal-orange-400 transition-colors">Submit News</Link></li>
               <li><Link to="/events" className="hover:text-vaal-orange-400 transition-colors">Events Calendar</Link></li>
+              <li><Link to="/add-event" className="hover:text-vaal-orange-400 transition-colors">Add Your Event</Link></li>
             </ul>
           </div>
 

@@ -199,14 +199,12 @@ const Home = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   // Modal state
-  const [showEventModal, setShowEventModal] = useState(false);
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [showSponsorModal, setShowSponsorModal] = useState(false);
   const [activeSponsor, setActiveSponsor] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Form state
-  const [eventForm, setEventForm] = useState({ name: '', email: '', phone: '', eventName: '', date: '', location: '', description: '' });
   const [businessForm, setBusinessForm] = useState({ name: '', email: '', phone: '', businessName: '', category: '', location: '', website: '', description: '' });
 
   // ── Convert DB hero slides into slide objects ────────────────────
@@ -392,21 +390,6 @@ const Home = () => {
   };
 
   // ─── Form submit handlers ─────────────────────────────────────
-  const handleEventSubmit = (e) => {
-    e.preventDefault();
-    const subject = encodeURIComponent(`New Event Submission: ${eventForm.eventName}`);
-    const body = encodeURIComponent(
-      `Name: ${eventForm.name}\nEmail: ${eventForm.email}\nPhone: ${eventForm.phone}\n\nEvent Name: ${eventForm.eventName}\nDate: ${eventForm.date}\nLocation: ${eventForm.location}\n\nDescription:\n${eventForm.description}`
-    );
-    window.location.href = `mailto:info@vaalhub.co.za?subject=${subject}&body=${body}`;
-    setFormSubmitted(true);
-    setTimeout(() => {
-      setShowEventModal(false);
-      setFormSubmitted(false);
-      setEventForm({ name: '', email: '', phone: '', eventName: '', date: '', location: '', description: '' });
-    }, 3000);
-  };
-
   const handleBusinessSubmit = (e) => {
     e.preventDefault();
     const subject = encodeURIComponent(`New Business Submission: ${businessForm.businessName}`);
@@ -778,12 +761,12 @@ const Home = () => {
             >
               Advertise With Us
             </Link>
-            <button
-              onClick={() => { setShowEventModal(true); setFormSubmitted(false); }}
+            <Link
+              to="/add-event"
               className="px-7 py-3 border-2 border-white text-white rounded-lg hover:bg-white hover:text-vaal-orange-600 transition-colors font-semibold"
             >
               Add Your Event
-            </button>
+            </Link>
             <button
               onClick={() => { setShowBusinessModal(true); setFormSubmitted(false); }}
               className="px-7 py-3 border-2 border-white text-white rounded-lg hover:bg-white hover:text-vaal-orange-600 transition-colors font-semibold"
@@ -793,75 +776,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* ═══════════════════════════════════════════════════════════
-          ADD YOUR EVENT MODAL
-          ═══════════════════════════════════════════════════════════ */}
-      {showEventModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="bg-vaal-orange-500 text-white px-6 py-5 rounded-t-2xl flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-bold">Add Your Event</h3>
-                <p className="text-white/80 text-sm mt-1">Submit your event and we'll get it listed</p>
-              </div>
-              <button onClick={() => setShowEventModal(false)} className="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
-            </div>
-
-            {formSubmitted ? (
-              <div className="p-8 text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">Opening your email...</h4>
-                <p className="text-gray-600 text-sm">Your email client is opening with your event details pre-filled. Just click Send!</p>
-              </div>
-            ) : (
-              <form onSubmit={handleEventSubmit} className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Your Name *</label>
-                    <input type="text" required className={inputClass} value={eventForm.name} onChange={e => setEventForm({...eventForm, name: e.target.value})} placeholder="John Smith" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email *</label>
-                    <input type="email" required className={inputClass} value={eventForm.email} onChange={e => setEventForm({...eventForm, email: e.target.value})} placeholder="you@email.com" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <input type="tel" className={inputClass} value={eventForm.phone} onChange={e => setEventForm({...eventForm, phone: e.target.value})} placeholder="+27 00 000 0000" />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Event Name *</label>
-                  <input type="text" required className={inputClass} value={eventForm.eventName} onChange={e => setEventForm({...eventForm, eventName: e.target.value})} placeholder="e.g. Vaal Market Day" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Date *</label>
-                    <input type="date" required className={inputClass} value={eventForm.date} onChange={e => setEventForm({...eventForm, date: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Location *</label>
-                    <input type="text" required className={inputClass} value={eventForm.location} onChange={e => setEventForm({...eventForm, location: e.target.value})} placeholder="e.g. Vanderbijlpark" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Event Description *</label>
-                  <textarea required rows={4} className={inputClass} value={eventForm.description} onChange={e => setEventForm({...eventForm, description: e.target.value})} placeholder="Tell us about your event – what's happening, who it's for, cost, etc." />
-                </div>
-                <p className="text-xs text-gray-500">Clicking Submit will open your email client with all details pre-filled. Just click Send!</p>
-                <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setShowEventModal(false)} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">Cancel</button>
-                  <button type="submit" className="flex-1 px-4 py-2.5 bg-vaal-orange-500 text-white rounded-lg hover:bg-vaal-orange-600 transition-colors font-semibold text-sm">Submit Event</button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ═══════════════════════════════════════════════════════════
           ADD YOUR BUSINESS MODAL

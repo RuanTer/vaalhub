@@ -12,7 +12,14 @@ const Header = () => {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'News', href: '/news' },
-    { name: 'Events', href: '/events' },
+    {
+      name: 'Events',
+      href: '/events',
+      submenu: [
+        { name: 'Browse Events', href: '/events' },
+        { name: '+ Add Your Event', href: '/add-event' },
+      ],
+    },
     {
       name: 'Businesses',
       href: '/businesses',

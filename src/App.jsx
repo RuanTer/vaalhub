@@ -13,6 +13,7 @@ import Businesses from './pages/Businesses';
 import ClaimBusiness from './pages/ClaimBusiness';
 import VerifyClaim from './pages/VerifyClaim';
 import AddBusiness from './pages/AddBusiness';
+import AddEvent from './pages/AddEvent';
 import BusinessDetail from './pages/BusinessDetail';
 import PortalLogin from './pages/portal/Login';
 import PortalDashboard from './pages/portal/Dashboard';
@@ -74,6 +75,7 @@ function AppInner() {
         <Route path="/claim-business" element={<ClaimBusiness />} />
         <Route path="/verify-claim" element={<VerifyClaim />} />
         <Route path="/add-business" element={<AddBusiness />} />
+        <Route path="/add-event" element={<AddEvent />} />
 
         {/* Placeholder routes - to be built */}
         <Route path="/explore" element={<Home />} />
