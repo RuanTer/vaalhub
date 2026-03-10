@@ -249,7 +249,8 @@ const Home = () => {
 
   // Sponsor slides injected between base slides based on display_order:
   // sponsor slides sit at display_order 50, so they appear between order 0–49 and 50+
-  const sponsorSlides = sponsors.map((sp) => ({
+  // Only sponsors with show_in_hero=1 appear in the carousel
+  const sponsorSlides = sponsors.filter((sp) => sp.show_in_hero === 1).map((sp) => ({
     title: sp.name,
     highlight: sp.tagline || '',
     description: sp.description || '',
