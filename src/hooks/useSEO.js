@@ -212,7 +212,8 @@ export function buildEventMeta(event) {
 
   const title = `${event.title} | VaalHub Events`;
   const description = toDescription(event.description);
-  const url = `${SITE_URL}/events`;
+  const slug = (event.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'event';
+  const url = event.event_id ? `${SITE_URL}/events/${event.event_id}/${slug}` : `${SITE_URL}/events`;
   const image = event.image_url || DEFAULT_IMAGE;
   const keywords = buildKeywords({ ...event, headline: event.title });
 

@@ -131,7 +131,61 @@ if (existsSync(distBizDir)) {
   console.log('inject-prerenders: no dist/businesses/ directory — skipping business profiles');
 }
 
+// ── Process event pages ──────────────────────────────────────────────────────
+let eventCount = 0;
+let eventTotal = 0;
+
+const distEventDir = join(distDir, 'events');
+if (existsSync(distEventDir)) {
+  // Structure: dist/events/{id}/{slug}/index.html
+  const idDirs = readdirSync(distEventDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  for (const eventId of idDirs) {
+    const idPath = join(distEventDir, eventId);
+    const slugDirs = readdirSync(idPath, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name);
+
+    eventTotal += slugDirs.length;
+    for (const slug of slugDirs) {
+      const path = join(idPath, slug, 'index.html');
+      if (injectPrerender(path, `events/${eventId}/${slug}`)) {
+        eventCount++;
+        console.log(`  ✅ events/${eventId}/${slug}/`);
+      }
+    }
+  }
+} else {
+  console.log('inject-prerenders: no dist/events/ directory — skipping events');
+}
+
+// ── Process town pages ───────────────────────────────────────────────────────
+let townCount = 0;
+let townTotal = 0;
+
+const distTownDir = join(distDir, 'towns');
+if (existsSync(distTownDir)) {
+  const townDirs = readdirSync(distTownDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  townTotal = townDirs.length;
+  for (const town of townDirs) {
+    const path = join(distTownDir, town, 'index.html');
+    if (injectPrerender(path, `towns/${town}`)) {
+      townCount++;
+      console.log(`  ✅ towns/${town}/`);
+    }
+  }
+} else {
+  console.log('inject-prerenders: no dist/towns/ directory — skipping towns');
+}
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log(`\ninject-prerenders: done`);
 console.log(`  Articles  : ${newsCount}/${newsTotal} enriched`);
 console.log(`  Businesses: ${bizCount}/${bizTotal} enriched`);
+console.log(`  Events    : ${eventCount}/${eventTotal} enriched`);
+console.log(`  Towns     : ${townCount}/${townTotal} enriched`);

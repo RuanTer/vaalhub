@@ -20,4 +20,9 @@
     <loc>https://vaalhub-api-production.up.railway.app/api/sitemap.xml</loc>
   </sitemap>
 
+  <!-- Google News sitemap: articles from last 48h with news-specific tags -->
+  <sitemap>
+    <loc>https://vaalhub-api-production.up.railway.app/api/news-sitemap.xml</loc>
+  </sitemap>
+
 </sitemapindex>

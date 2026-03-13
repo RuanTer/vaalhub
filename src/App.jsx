@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
 import Businesses from './pages/Businesses';
 import ClaimBusiness from './pages/ClaimBusiness';
 import VerifyClaim from './pages/VerifyClaim';
@@ -69,6 +70,7 @@ function AppInner() {
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsDetail />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/events/:id/:slug" element={<EventDetail />} />
         <Route path="/businesses" element={<Businesses />} />
         <Route path="/businesses/:id" element={<BusinessDetail />} />
         <Route path="/businesses/:id/:slug" element={<BusinessDetail />} />

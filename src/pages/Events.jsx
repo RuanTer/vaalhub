@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { buildPageMeta, buildItemListMeta } from '../hooks/useSEO';
-import Modal from '../components/ui/Modal';
+// Modal removed — events now use dedicated detail pages
 import SponsorBanner from '../components/ui/SponsorBanner';
 import NewsletterSignupBar from '../components/ui/NewsletterSignupBar';
 
@@ -81,7 +81,7 @@ export default function Events() {
   const [events, setEvents]           = useState([]);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
-  const [selectedEvent, setSelected]  = useState(null);
+  // selectedEvent state removed — events now link to /events/:id/:slug detail page
   const [total, setTotal]             = useState(0);
   const [page, setPage]               = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -348,7 +348,7 @@ export default function Events() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {events.map(event => (
-                <EventCard key={event.event_id} event={event} onOpen={setSelected} />
+                <EventCard key={event.event_id} event={event} />
               ))}
             </div>
 
@@ -360,19 +360,23 @@ export default function Events() {
       {/* Newsletter */}
       <NewsletterSignupBar />
 
-      {/* Modal */}
-      {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelected(null)} />}
+      {/* Events now link to individual detail pages at /events/:id/:slug */}
     </div>
   );
 }
 
 // ── Event card ────────────────────────────────────────────────────────────────
 
-function EventCard({ event, onOpen }) {
+function eventSlug(title = '') {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'event';
+}
+
+function EventCard({ event }) {
   const sd = shortDate(event.date_start);
+  const slug = eventSlug(event.title);
   return (
-    <div
-      onClick={() => onOpen(event)}
+    <Link
+      to={`/events/${event.event_id}/${slug}`}
       className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden cursor-pointer flex flex-col"
     >
       {/* Image */}
@@ -434,11 +438,11 @@ function EventCard({ event, onOpen }) {
         )}
 
         {/* Button */}
-        <button className="mt-3 w-full py-1.5 bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white text-xs font-semibold rounded-lg transition-colors">
+        <span className="mt-3 w-full py-1.5 bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white text-xs font-semibold rounded-lg transition-colors block text-center">
           View Details
-        </button>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 

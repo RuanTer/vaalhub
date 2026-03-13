@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-# Sitemaps
+# Sitemaps (sitemap.xml is an index that includes static, dynamic, and news sitemaps)
 Sitemap: https://vaalhub.co.za/sitemap.xml
 
 # Disallow admin / internal paths

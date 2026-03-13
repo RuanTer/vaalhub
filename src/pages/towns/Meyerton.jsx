@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Modal from '../../components/ui/Modal';
 import { townHistories } from '../../data/townHistories';
+import TownDynamicContent from '../../components/TownDynamicContent';
 
 const Meyerton = () => {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -211,6 +212,8 @@ const Meyerton = () => {
           </div>
         </div>
       </div>
+
+      <TownDynamicContent townName="Meyerton" townSlug="meyerton" province="Gauteng" />
 
       {/* History Modal */}
       <Modal

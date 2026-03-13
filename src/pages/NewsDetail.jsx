@@ -283,8 +283,10 @@ export default function NewsDetail() {
             {article.source_url && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
                 <p className="text-sm text-gray-600 mb-2">
-                  <strong>Source:</strong> Content aggregated from external sources.
-                  {article.source_name && ` Original reporting by ${article.source_name}.`}
+                  {article.source_name
+                    ? <><strong>Source:</strong> Originally reported by {article.source_name}. Rewritten by VaalHub editorial.</>
+                    : <><strong>Source:</strong> Content aggregated from external sources.</>
+                  }
                 </p>
                 <a
                   href={article.source_url}
