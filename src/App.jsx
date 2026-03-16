@@ -25,6 +25,8 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Subscribe from './pages/Subscribe';
 import Contact from './pages/Contact';
+import ServiceLanding from './pages/ServiceLanding';
+import EventsLanding from './pages/EventsLanding';
 import NotFound from './pages/NotFound';
 import Vereeniging from './pages/towns/Vereeniging';
 import Vanderbijlpark from './pages/towns/Vanderbijlpark';
@@ -70,8 +72,14 @@ function AppInner() {
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsDetail />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/events/this-weekend" element={<EventsLanding />} />
+        <Route path="/events/category/:categorySlug" element={<EventsLanding />} />
+        <Route path="/events/category/:categorySlug/:locationSlug" element={<EventsLanding />} />
+        <Route path="/events/:locationSlug" element={<EventsLanding />} />
         <Route path="/events/:id/:slug" element={<EventDetail />} />
         <Route path="/businesses" element={<Businesses />} />
+        <Route path="/businesses/services/:serviceSlug" element={<ServiceLanding />} />
+        <Route path="/businesses/services/:serviceSlug/:locationSlug" element={<ServiceLanding />} />
         <Route path="/businesses/:id" element={<BusinessDetail />} />
         <Route path="/businesses/:id/:slug" element={<BusinessDetail />} />
         <Route path="/claim-business" element={<ClaimBusiness />} />

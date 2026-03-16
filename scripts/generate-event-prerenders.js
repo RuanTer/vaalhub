@@ -167,6 +167,9 @@ function generateHtml(event) {
   <h1>${escapeHtml(rawTitle)}</h1>
   ${dateDisplay ? `<p>${dateDisplay}</p>` : ''}
   <p>${escapeHtml(location)}</p>
+  ${event.organizer ? `<p>Organised by: ${escapeHtml(event.organizer)}</p>` : ''}
+  ${event.price ? `<p>Price: R${escapeHtml(String(event.price))}</p>` : ''}
+  <a href="/events">Find more events on VaalHub</a>
 </body>
 </html>`;
 }

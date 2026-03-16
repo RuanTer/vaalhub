@@ -12,23 +12,47 @@ const LOCATIONS = [
   'Vereeniging', 'Vanderbijlpark', 'Meyerton', 'Sasolburg', 'Sharpeville',
 ];
 
+const CATEGORY_TAGS = {
+  Construction: ['Fencing', 'Plumbing', 'Electrician', 'Painting', 'Roofing', 'Tiling', 'Paving', 'Welding', 'Carpentry', 'Waterproofing', 'Flooring', 'Solar', 'Gates', 'Garage Doors', 'Landscaping', 'Swimming Pool', 'Borehole', 'Handyman'],
+  Service: ['Cleaning', 'Pest Control', 'Security', 'Locksmith', 'Courier', 'Moving', 'Storage', 'Laundry', 'Printing', 'Signage', 'IT Support', 'Computer Repair', 'Air Conditioning', 'Gardening', 'Tree Felling', 'Photography'],
+  Automotive: ['Mechanic', 'Panel Beater', 'Tyres', 'Towing', 'Car Wash', 'Brakes', 'Spray Painting', 'Fitment Centre', 'Auto Electrician', 'Car Rental'],
+  Restaurant: ['Pizza', 'Burgers', 'Sushi', 'Steakhouse', 'Coffee Shop', 'Bakery', 'Takeaway', 'Fast Food', 'Pub', 'Grill', 'Catering', 'Halal'],
+  Healthcare: ['Dentist', 'Doctor', 'Physiotherapy', 'Optometrist', 'Pharmacy', 'Vet', 'Gym', 'Fitness', 'Spa', 'Beauty Salon', 'Hairdresser', 'Barber', 'Nail Salon'],
+  'Professional Services': ['Attorney', 'Accountant', 'Tax', 'Financial Advisor', 'Insurance', 'Estate Agent', 'Architect', 'Engineer', 'Bookkeeper', 'Web Design'],
+  Retail: ['Clothing', 'Furniture', 'Hardware', 'Electronics', 'Grocery', 'Pet Shop', 'Florist', 'Jewellery', 'Sports', 'Liquor'],
+  Education: ['Creche', 'Daycare', 'Tutor', 'Driving School', 'Training Centre', 'Music Lessons', 'Dance'],
+  Entertainment: ['Cinema', 'Bowling', 'Casino', 'Nightclub', 'Live Music', 'Venue', 'Party Hire', 'Kids Entertainment'],
+};
+
 export default function AddBusiness() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
     businessName: '', category: '', location: '', website: '', description: '',
   });
+  const [selectedTags, setSelectedTags] = useState([]);
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    // Clear tags when category changes
+    if (name === 'category') setSelectedTags([]);
   };
+
+  const toggleTag = (tag) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const availableTags = CATEGORY_TAGS[form.category] || [];
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const tagsStr = selectedTags.length > 0 ? `\nTags: ${selectedTags.join(', ')}` : '';
     const subject = encodeURIComponent(`New Business Submission: ${form.businessName}`);
     const body = encodeURIComponent(
-      `Contact Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\nBusiness Name: ${form.businessName}\nCategory: ${form.category}\nLocation: ${form.location}\nWebsite: ${form.website}\n\nDescription:\n${form.description}`
+      `Contact Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\nBusiness Name: ${form.businessName}\nCategory: ${form.category}${tagsStr}\nLocation: ${form.location}\nWebsite: ${form.website}\n\nDescription:\n${form.description}`
     );
     window.location.href = `mailto:info@vaalhub.co.za?subject=${subject}&body=${body}`;
     setSubmitted(true);
@@ -234,6 +258,31 @@ export default function AddBusiness() {
                     </select>
                   </div>
                 </div>
+
+                {availableTags.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      What services do you offer? <span className="text-gray-400 font-normal">(select all that apply)</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableTags.map(tag => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                            selectedTags.includes(tag)
+                              ? 'bg-vaal-orange-500 text-white border-vaal-orange-500'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-vaal-orange-300 hover:bg-vaal-orange-50'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-1.5 text-xs text-gray-400">These help customers find you when searching for specific services.</p>
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1.5">

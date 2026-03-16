@@ -18,6 +18,10 @@ const TWITTER_HANDLE = '@VaalHub';
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
+function slugify(text = '') {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
 /** Strip HTML and truncate to ~155 chars for meta description */
 export function toDescription(text, maxLen = 155) {
   if (!text) return '';
@@ -93,6 +97,16 @@ export function buildKeywords(item) {
       sumCount++;
     }
   });
+
+  // Service keywords from tags
+  if (item.tags) {
+    item.tags.split(',').forEach(tag => {
+      const trimmed = tag.trim();
+      if (trimmed.length >= 3) {
+        parts.add(trimmed.charAt(0).toUpperCase() + trimmed.slice(1));
+      }
+    });
+  }
 
   return [...parts].join(', ');
 }
@@ -343,16 +357,53 @@ export function buildBusinessMeta(business, overrideUrl) {
         worstRating:   '1',
       },
     }),
-    areaServed: {
-      '@type': 'Place',
-      name: business.area || 'Vaal Triangle',
-      address: {
-        '@type':          'PostalAddress',
-        addressLocality:  business.area || 'Vaal Triangle',
-        addressRegion,
-        addressCountry:   'ZA',
+    areaServed: [
+      {
+        '@type': 'Place',
+        name: business.area || 'Vaal Triangle',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: business.area || 'Vaal Triangle',
+          addressRegion,
+          addressCountry: 'ZA',
+        },
       },
+      {
+        '@type': 'GeoCircle',
+        geoMidpoint: {
+          '@type': 'GeoCoordinates',
+          latitude: -26.6735,
+          longitude: 27.9262,
+        },
+        geoRadius: '30000',
+      },
+    ],
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: -26.6735,
+      longitude: 27.9262,
     },
+    ...(business.tags && {
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: `Services by ${name}`,
+        itemListElement: business.tags.split(',').slice(0, 8).map(tag => ({
+          '@type': 'OfferCatalog',
+          name: tag.trim(),
+          itemListElement: [{
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: tag.trim(),
+              areaServed: {
+                '@type': 'Place',
+                name: business.area || 'Vaal Triangle',
+              },
+            },
+          }],
+        })),
+      },
+    }),
     currenciesAccepted: 'ZAR',
     inLanguage: 'en-ZA',
   };
@@ -446,6 +497,128 @@ export function buildItemListMeta(items, listName, listUrl) {
   const schema = buildItemListSchema(items, listName, listUrl);
   if (!schema) return null;
   return jsonLd(schema, 'json-ld-itemlist');
+}
+
+// ── Page-level SEO (listing pages) ───────────────────────────────────────
+
+// ── Service landing page SEO ──────────────────────────────────────────────
+
+export function buildServiceMeta({ service, location, businesses = [] }) {
+  const locationLabel = location || 'Vaal Triangle';
+  const title = location
+    ? `${service} in ${locationLabel} | VaalHub Business Directory`
+    : `${service} | Vaal Triangle | VaalHub Business Directory`;
+  const description = `Find trusted ${service.toLowerCase()} in ${locationLabel}, Vaal Triangle. Compare reviews, get contact details and quotes from verified local businesses on VaalHub.`;
+  const path = location
+    ? `/businesses/services/${slugify(service)}/${slugify(location)}`
+    : `/businesses/services/${slugify(service)}`;
+  const url = `${SITE_URL}${path}`;
+  const keywords = `${service}, ${locationLabel}, Vaal Triangle, ${service.toLowerCase()} near me, ${service.toLowerCase()} ${locationLabel.toLowerCase()}, VaalHub`;
+
+  // FAQ Schema
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: `Where can I find a ${service.toLowerCase()} in ${locationLabel}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `VaalHub lists verified ${service.toLowerCase()} businesses in ${locationLabel} and the wider Vaal Triangle. Browse our directory to compare reviews, contact details and services offered.`,
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `How do I choose the best ${service.toLowerCase()} in ${locationLabel}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Check Google reviews and ratings on VaalHub, compare services offered, and contact multiple businesses for quotes. Look for verified businesses with the VaalHub verified badge.`,
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `Are there verified ${service.toLowerCase()} businesses on VaalHub?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Yes, VaalHub verifies local businesses. Verified businesses display a blue verified badge. You can filter the directory to show only verified businesses.`,
+        },
+      },
+    ],
+  };
+
+  // Service schema
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: `${service} in ${locationLabel}`,
+    description,
+    url,
+    provider: {
+      '@type': 'Organization',
+      name: 'VaalHub',
+      url: SITE_URL,
+    },
+    areaServed: {
+      '@type': 'Place',
+      name: locationLabel,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: locationLabel,
+        addressRegion: locationLabel === 'Sasolburg' ? 'Free State' : 'Gauteng',
+        addressCountry: 'ZA',
+      },
+    },
+    serviceType: service,
+  };
+
+  // ItemList of businesses
+  const itemListSchema = businesses.length ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `${service} businesses in ${locationLabel}`,
+    numberOfItems: businesses.length,
+    itemListElement: businesses.slice(0, 20).map((biz, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: biz.business_name || biz.name,
+      url: `${SITE_URL}/businesses/${biz.business_id}/${(biz.business_name || biz.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`,
+    })),
+  } : null;
+
+  const crumbSchema = breadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Businesses', url: '/businesses' },
+    { name: service, url: `/businesses/services/${slugify(service)}` },
+    ...(location ? [{ name: locationLabel }] : []),
+  ]);
+
+  const elements = [
+    e('title', { key: 'title' }, title),
+    e('meta', { key: 'desc', name: 'description', content: description }),
+    e('meta', { key: 'keywords', name: 'keywords', content: keywords }),
+    e('meta', { key: 'robots', name: 'robots', content: 'index, follow' }),
+    e('link', { key: 'canonical', rel: 'canonical', href: url }),
+    e('meta', { key: 'og:type', property: 'og:type', content: 'website' }),
+    e('meta', { key: 'og:url', property: 'og:url', content: url }),
+    e('meta', { key: 'og:title', property: 'og:title', content: title }),
+    e('meta', { key: 'og:description', property: 'og:description', content: description }),
+    e('meta', { key: 'og:image', property: 'og:image', content: DEFAULT_IMAGE }),
+    e('meta', { key: 'og:site_name', property: 'og:site_name', content: SITE_NAME }),
+    e('meta', { key: 'og:locale', property: 'og:locale', content: 'en_ZA' }),
+    e('meta', { key: 'tw:card', name: 'twitter:card', content: 'summary_large_image' }),
+    e('meta', { key: 'tw:site', name: 'twitter:site', content: TWITTER_HANDLE }),
+    e('meta', { key: 'tw:title', name: 'twitter:title', content: title }),
+    e('meta', { key: 'tw:desc', name: 'twitter:description', content: description }),
+    e('meta', { key: 'tw:image', name: 'twitter:image', content: DEFAULT_IMAGE }),
+    jsonLd(faqSchema, 'json-ld-faq'),
+    jsonLd(serviceSchema, 'json-ld-service'),
+    jsonLd(crumbSchema, 'json-ld-breadcrumb'),
+  ];
+
+  if (itemListSchema) elements.push(jsonLd(itemListSchema, 'json-ld-itemlist'));
+
+  return elements;
 }
 
 // ── Page-level SEO (listing pages) ───────────────────────────────────────

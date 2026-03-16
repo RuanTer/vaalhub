@@ -128,10 +128,53 @@ function generateHtml(biz) {
         worstRating: '1',
       },
     }),
-    areaServed: {
-      '@type': 'Place',
-      name: biz.area || 'Vaal Triangle',
+    areaServed: [
+      {
+        '@type': 'Place',
+        name: biz.area || 'Vaal Triangle',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: biz.area || biz.location || 'Vaal Triangle',
+          addressRegion,
+          addressCountry: 'ZA',
+        },
+      },
+      {
+        '@type': 'GeoCircle',
+        geoMidpoint: {
+          '@type': 'GeoCoordinates',
+          latitude: -26.6735,
+          longitude: 27.9262,
+        },
+        geoRadius: '30000',
+      },
+    ],
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: -26.6735,
+      longitude: 27.9262,
     },
+    ...(biz.tags && {
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: `Services by ${rawName}`,
+        itemListElement: biz.tags.split(',').slice(0, 8).map(tag => ({
+          '@type': 'OfferCatalog',
+          name: tag.trim(),
+          itemListElement: [{
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: tag.trim(),
+              areaServed: {
+                '@type': 'Place',
+                name: biz.area || 'Vaal Triangle',
+              },
+            },
+          }],
+        })),
+      },
+    }),
     currenciesAccepted: 'ZAR',
     inLanguage: 'en-ZA',
   };
@@ -146,11 +189,18 @@ function generateHtml(biz) {
     ],
   };
 
+  // Build service keywords from tags
+  const tagKeywords = biz.tags
+    ? biz.tags.split(',').map(t => escapeHtml(t.trim())).filter(Boolean).join(', ')
+    : '';
+  const metaKeywords = [rawName, biz.category, biz.area || 'Vaal Triangle', 'Vaal Triangle', tagKeywords, 'VaalHub'].filter(Boolean).join(', ');
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <title>${title}</title>
   <meta name="description"  content="${description}">
+  <meta name="keywords"     content="${escapeHtml(metaKeywords)}">
   <meta name="robots"       content="index, follow">
   <link rel="canonical"     href="${escapeHtml(bizUrl)}">
   <!-- Open Graph -->
@@ -173,7 +223,13 @@ function generateHtml(biz) {
   <script type="application/ld+json">${JSON.stringify(schema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>
 </head>
-<body></body>
+<body>
+  <h1>${name}</h1>
+  <p>${description}</p>
+  ${biz.tags ? `<p>Services: ${escapeHtml(biz.tags.split(',').map(t => t.trim()).join(', '))}</p>` : ''}
+  <p>Location: ${area}, Vaal Triangle, South Africa</p>
+  <a href="/businesses">Back to Business Directory</a>
+</body>
 </html>`;
 }
 

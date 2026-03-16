@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prerenders": "node scripts/generate-business-prerenders.js && node scripts/generate-news-prerenders.js && node scripts/generate-event-prerenders.js && node scripts/generate-town-prerenders.js",
+    "prerenders": "node scripts/generate-business-prerenders.js && node scripts/generate-news-prerenders.js && node scripts/generate-event-prerenders.js && node scripts/generate-town-prerenders.js && node scripts/generate-service-prerenders.js && node scripts/generate-events-landing-prerenders.js",
     "postbuild": "node scripts/inject-prerenders.js",
     "build:full": "npm run prerenders && npm run build",
     "deploy": "npm run build:full && gh-pages -d dist"

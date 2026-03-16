@@ -234,6 +234,19 @@ export default function BusinessDetail() {
                 {business.description && (
                   <p className="mt-3 text-gray-600 leading-relaxed">{business.description}</p>
                 )}
+                {business.tags && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {business.tags.split(',').map(tag => (
+                      <Link
+                        key={tag.trim()}
+                        to={`/businesses?tag=${encodeURIComponent(tag.trim())}`}
+                        className="text-xs px-2.5 py-1 bg-gray-50 text-gray-500 hover:bg-vaal-orange-50 hover:text-vaal-orange-700 border border-gray-200 hover:border-vaal-orange-300 rounded-full transition-colors"
+                      >
+                        {tag.trim()}
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -297,6 +310,62 @@ export default function BusinessDetail() {
                   alt={`${name} specials`}
                   className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
                 />
+              </div>
+            </div>
+          )}
+
+          {/* ── PDF Viewer (menu, pricelist, brochure) ─────────────── */}
+          {business.pdf_filename && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+              {/* Section header */}
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-vaal-orange-50 text-vaal-orange-500">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                </span>
+                <div>
+                  <h2 className="text-base font-semibold text-gray-800">Documents &amp; Downloads</h2>
+                  <p className="text-xs text-gray-400">Menu, pricelist, or brochure from this business</p>
+                </div>
+              </div>
+
+              {/* Embedded PDF viewer */}
+              <div className="p-4">
+                <object
+                  data={`${API_URL}/api/businesses/${business.business_id}/pdf`}
+                  type="application/pdf"
+                  className="w-full h-[600px] sm:h-[500px] rounded-lg border border-gray-200"
+                >
+                  <iframe
+                    src={`${API_URL}/api/businesses/${business.business_id}/pdf`}
+                    className="w-full h-[600px] sm:h-[500px] rounded-lg border border-gray-200"
+                    title={`${name} document`}
+                  >
+                    <p className="text-gray-500 text-sm p-4">
+                      Your browser does not support embedded PDFs.
+                    </p>
+                  </iframe>
+                </object>
+
+                {/* Download / open link as fallback */}
+                <a
+                  href={`${API_URL}/api/businesses/${business.business_id}/pdf`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-vaal-orange-600 hover:text-vaal-orange-700 transition-colors"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download PDF
+                </a>
               </div>
             </div>
           )}

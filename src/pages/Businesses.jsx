@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { buildPageMeta } from '../hooks/useSEO';
 import Modal from '../components/ui/Modal';
@@ -108,6 +108,7 @@ function Pagination({ page, totalPages, onChange }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function Businesses() {
+  const [searchParams] = useSearchParams();
   const [businesses, setBusinesses]     = useState([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
@@ -115,6 +116,8 @@ export default function Businesses() {
   const [total, setTotal]               = useState(0);
   const [page, setPage]                 = useState(1);
   const [filtersOpen, setFiltersOpen]   = useState(false);
+  const [popularTags, setPopularTags]   = useState([]);
+  const [selectedTag, setSelectedTag]   = useState(searchParams.get('tag') || '');
 
   const [filters, setFilters] = useState({
     location:     '',
@@ -123,10 +126,18 @@ export default function Businesses() {
     verifiedOnly: false,
   });
 
+  // Fetch popular tags once on mount
+  useEffect(() => {
+    fetch(`${API_URL}/api/business-tags`)
+      .then(r => r.json())
+      .then(data => setPopularTags(data.popular || []))
+      .catch(() => {});
+  }, []);
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   // Fetch whenever page or filters change
-  const fetchBusinesses = useCallback(async (currentPage, currentFilters) => {
+  const fetchBusinesses = useCallback(async (currentPage, currentFilters, currentTag) => {
     setLoading(true);
     setError(null);
     try {
@@ -139,6 +150,7 @@ export default function Businesses() {
       if (currentFilters.category)     params.append('category',  currentFilters.category);
       if (currentFilters.search)       params.append('search',    currentFilters.search);
       if (currentFilters.verifiedOnly) params.append('verified',  '1');
+      if (currentTag)                  params.append('tag',       currentTag);
 
       const res  = await fetch(`${API_URL}/api/businesses?${params}`);
       if (!res.ok) throw new Error('Failed to fetch businesses');
@@ -154,22 +166,22 @@ export default function Businesses() {
     }
   }, []);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or tag change
   useEffect(() => {
     setPage(1);
-    fetchBusinesses(1, filters);
-  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchBusinesses(1, filters, selectedTag);
+  }, [filters, selectedTag]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch when page changes (but not on filter changes — handled above)
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchBusinesses(newPage, filters);
+    fetchBusinesses(newPage, filters, selectedTag);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const activeFilterCount = [filters.location, filters.category, filters.search, filters.verifiedOnly].filter(Boolean).length;
+  const activeFilterCount = [filters.location, filters.category, filters.search, filters.verifiedOnly, selectedTag].filter(Boolean).length;
 
-  const clearFilters = () => setFilters({ location: '', category: '', search: '', verifiedOnly: false });
+  const clearFilters = () => { setFilters({ location: '', category: '', search: '', verifiedOnly: false }); setSelectedTag(''); };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -196,7 +208,7 @@ export default function Businesses() {
             </svg>
             <input
               type="text"
-              placeholder="Search businesses…"
+              placeholder="Search by name, service, or keyword…"
               value={filters.search}
               onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl text-gray-900 text-sm placeholder-gray-400 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
@@ -345,6 +357,38 @@ export default function Businesses() {
         </div>
       </div>
 
+      {/* ── Popular tags ──────────────────────────────────────────────────── */}
+      {popularTags.length > 0 && (
+        <div className="bg-white border-b border-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              <span className="text-xs text-gray-400 font-medium whitespace-nowrap flex-shrink-0">Popular:</span>
+              {popularTags.slice(0, 15).map(t => (
+                <button
+                  key={t.tag}
+                  onClick={() => setSelectedTag(prev => prev === t.tag ? '' : t.tag)}
+                  className={`whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-medium border transition-colors flex-shrink-0 ${
+                    selectedTag === t.tag
+                      ? 'bg-vaal-orange-500 text-white border-vaal-orange-500'
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-vaal-orange-50 hover:border-vaal-orange-300 hover:text-vaal-orange-700'
+                  }`}
+                >
+                  {t.tag} <span className="text-[10px] opacity-70">({t.count})</span>
+                </button>
+              ))}
+              {selectedTag && (
+                <button
+                  onClick={() => setSelectedTag('')}
+                  className="whitespace-nowrap text-xs text-gray-400 hover:text-vaal-orange-600 underline flex-shrink-0"
+                >
+                  clear
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Main content ─────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
@@ -473,6 +517,11 @@ function BusinessCard({ biz, onQuickView }) {
               {biz.location}
             </span>
           )}
+          {biz.tags && biz.tags.split(',').slice(0, 3).map(tag => (
+            <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-gray-50 text-gray-400 rounded-full">
+              {tag.trim()}
+            </span>
+          ))}
         </div>
 
         {/* Name */}

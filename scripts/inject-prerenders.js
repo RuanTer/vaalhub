@@ -108,8 +108,9 @@ let bizTotal = 0;
 const distBizDir = join(distDir, 'businesses');
 if (existsSync(distBizDir)) {
   // Structure: dist/businesses/{id}/{slug}/index.html
+  // Skip 'services' directory — handled separately below
   const idDirs = readdirSync(distBizDir, { withFileTypes: true })
-    .filter(d => d.isDirectory())
+    .filter(d => d.isDirectory() && d.name !== 'services')
     .map(d => d.name);
 
   for (const bizId of idDirs) {
@@ -135,11 +136,14 @@ if (existsSync(distBizDir)) {
 let eventCount = 0;
 let eventTotal = 0;
 
+// Reserved directories inside dist/events/ that are event landing pages, not individual event pre-renders
+const reservedEventDirs = new Set(['this-weekend', 'category', 'vereeniging', 'vanderbijlpark', 'meyerton', 'sasolburg', 'sharpeville']);
+
 const distEventDir = join(distDir, 'events');
 if (existsSync(distEventDir)) {
-  // Structure: dist/events/{id}/{slug}/index.html
+  // Structure: dist/events/{id}/{slug}/index.html (skip reserved landing page dirs)
   const idDirs = readdirSync(distEventDir, { withFileTypes: true })
-    .filter(d => d.isDirectory())
+    .filter(d => d.isDirectory() && !reservedEventDirs.has(d.name))
     .map(d => d.name);
 
   for (const eventId of idDirs) {
@@ -159,6 +163,116 @@ if (existsSync(distEventDir)) {
   }
 } else {
   console.log('inject-prerenders: no dist/events/ directory — skipping events');
+}
+
+// ── Process event landing pages ─────────────────────────────────────────────
+let evtLandingCount = 0;
+let evtLandingTotal = 0;
+
+if (existsSync(distEventDir)) {
+  // This weekend page
+  const weekendPath = join(distEventDir, 'this-weekend', 'index.html');
+  if (existsSync(weekendPath)) {
+    evtLandingTotal++;
+    if (injectPrerender(weekendPath, 'events/this-weekend')) {
+      evtLandingCount++;
+      console.log('  ✅ events/this-weekend/');
+    }
+  }
+
+  // Location pages
+  const locationSlugs = ['vereeniging', 'vanderbijlpark', 'meyerton', 'sasolburg', 'sharpeville'];
+  for (const locSlug of locationSlugs) {
+    const locPath = join(distEventDir, locSlug, 'index.html');
+    if (existsSync(locPath)) {
+      evtLandingTotal++;
+      if (injectPrerender(locPath, `events/${locSlug}`)) {
+        evtLandingCount++;
+        console.log(`  ✅ events/${locSlug}/`);
+      }
+    }
+  }
+
+  // Category pages and category + location combo pages
+  const distCatDir = join(distEventDir, 'category');
+  if (existsSync(distCatDir)) {
+    const catDirs = readdirSync(distCatDir, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name);
+
+    for (const catSlug of catDirs) {
+      const catPath = join(distCatDir, catSlug);
+
+      // Category-only page
+      const catIndex = join(catPath, 'index.html');
+      if (existsSync(catIndex)) {
+        evtLandingTotal++;
+        if (injectPrerender(catIndex, `events/category/${catSlug}`)) {
+          evtLandingCount++;
+          console.log(`  ✅ events/category/${catSlug}/`);
+        }
+      }
+
+      // Category + location pages
+      const locDirs = readdirSync(catPath, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .map(d => d.name);
+
+      for (const locSlug of locDirs) {
+        evtLandingTotal++;
+        const locIndex = join(catPath, locSlug, 'index.html');
+        if (injectPrerender(locIndex, `events/category/${catSlug}/${locSlug}`)) {
+          evtLandingCount++;
+          console.log(`  ✅ events/category/${catSlug}/${locSlug}/`);
+        }
+      }
+    }
+  }
+} else {
+  console.log('inject-prerenders: no dist/events/ directory — skipping event landing pages');
+}
+
+// ── Process service landing pages ────────────────────────────────────────────
+let svcCount = 0;
+let svcTotal = 0;
+
+const distSvcDir = join(distDir, 'businesses', 'services');
+if (existsSync(distSvcDir)) {
+  // Structure: dist/businesses/services/{serviceSlug}/index.html
+  //            dist/businesses/services/{serviceSlug}/{locationSlug}/index.html
+  const serviceDirs = readdirSync(distSvcDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  for (const svcSlug of serviceDirs) {
+    const svcPath = join(distSvcDir, svcSlug);
+
+    // Service-only page
+    const svcIndex = join(svcPath, 'index.html');
+    if (existsSync(svcIndex)) {
+      svcTotal++;
+      if (injectPrerender(svcIndex, `businesses/services/${svcSlug}`)) {
+        svcCount++;
+        console.log(`  ✅ businesses/services/${svcSlug}/`);
+      }
+    }
+
+    // Service + location pages
+    const locDirs = readdirSync(svcPath, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name);
+
+    for (const locSlug of locDirs) {
+      svcTotal++;
+      const locIndex = join(svcPath, locSlug, 'index.html');
+      if (injectPrerender(locIndex, `businesses/services/${svcSlug}/${locSlug}`)) {
+        svcCount++;
+        console.log(`  ✅ businesses/services/${svcSlug}/${locSlug}/`);
+      }
+    }
+  }
+} else {
+  console.log('inject-prerenders: no dist/businesses/services/ directory — skipping service pages');
 }
 
 // ── Process town pages ───────────────────────────────────────────────────────
@@ -185,7 +299,9 @@ if (existsSync(distTownDir)) {
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log(`\ninject-prerenders: done`);
-console.log(`  Articles  : ${newsCount}/${newsTotal} enriched`);
-console.log(`  Businesses: ${bizCount}/${bizTotal} enriched`);
-console.log(`  Events    : ${eventCount}/${eventTotal} enriched`);
-console.log(`  Towns     : ${townCount}/${townTotal} enriched`);
+console.log(`  Articles       : ${newsCount}/${newsTotal} enriched`);
+console.log(`  Businesses     : ${bizCount}/${bizTotal} enriched`);
+console.log(`  Services       : ${svcCount}/${svcTotal} enriched`);
+console.log(`  Events         : ${eventCount}/${eventTotal} enriched`);
+console.log(`  Event Landings : ${evtLandingCount}/${evtLandingTotal} enriched`);
+console.log(`  Towns          : ${townCount}/${townTotal} enriched`);
