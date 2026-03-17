@@ -126,6 +126,13 @@ export default function AddBusiness() {
 
     const token = await executeRecaptcha('submit_business');
 
+    const normalizeUrl = (url) => {
+      if (!url || !url.trim()) return '';
+      const trimmed = url.trim();
+      if (/^https?:\/\//i.test(trimmed)) return trimmed;
+      return 'https://' + trimmed;
+    };
+
     try {
       const formData = new FormData();
       formData.append('submitter_name', form.name);
@@ -135,9 +142,9 @@ export default function AddBusiness() {
       formData.append('category', form.category);
       formData.append('location', form.location);
       formData.append('description', form.description);
-      formData.append('website', form.website);
-      formData.append('facebook', form.facebook);
-      formData.append('instagram', form.instagram);
+      formData.append('website', normalizeUrl(form.website));
+      formData.append('facebook', normalizeUrl(form.facebook));
+      formData.append('instagram', normalizeUrl(form.instagram));
       formData.append('recaptcha_token', token || '');
 
       if (selectedTags.length > 0) {
@@ -420,9 +427,9 @@ export default function AddBusiness() {
                     Website or social media link
                   </label>
                   <input
-                    id="website" name="website" type="url"
+                    id="website" name="website" type="text"
                     value={form.website} onChange={handleChange}
-                    placeholder="https://www.yourbusiness.co.za"
+                    placeholder="www.yourbusiness.co.za"
                     className={inputClass}
                   />
                 </div>
@@ -433,9 +440,9 @@ export default function AddBusiness() {
                       Facebook page URL
                     </label>
                     <input
-                      id="facebook" name="facebook" type="url"
+                      id="facebook" name="facebook" type="text"
                       value={form.facebook} onChange={handleChange}
-                      placeholder="https://facebook.com/yourbusiness"
+                      placeholder="facebook.com/yourbusiness"
                       className={inputClass}
                     />
                   </div>
@@ -444,9 +451,9 @@ export default function AddBusiness() {
                       Instagram URL
                     </label>
                     <input
-                      id="instagram" name="instagram" type="url"
+                      id="instagram" name="instagram" type="text"
                       value={form.instagram} onChange={handleChange}
-                      placeholder="https://instagram.com/yourbusiness"
+                      placeholder="instagram.com/yourbusiness"
                       className={inputClass}
                     />
                   </div>
