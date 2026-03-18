@@ -161,12 +161,14 @@ export default function BusinessDetail() {
   const slug = slugify(name);
   const canonicalUrl = `${SITE_URL}/businesses/${id}/${slug}`;
   const icon = CATEGORY_ICONS[business.category] || '🏢';
-  const logoSrc = business.logo_url
-    ? (business.logo_url.startsWith('http') ? business.logo_url : `${API_URL}${business.logo_url}`)
-    : null;
-  const promoSrc = business.promo_image
-    ? (business.promo_image.startsWith('http') ? business.promo_image : `${API_URL}${business.promo_image}`)
-    : null;
+  const resolveMediaUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    if (url.startsWith('/api/')) return `${API_URL}${url}`;
+    return `${SITE_URL}${url}`;
+  };
+  const logoSrc = resolveMediaUrl(business.logo_url);
+  const promoSrc = resolveMediaUrl(business.promo_image);
 
   return (
     <>

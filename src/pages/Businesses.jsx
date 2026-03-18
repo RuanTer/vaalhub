@@ -471,10 +471,17 @@ export default function Businesses() {
 
 // ── Business card ─────────────────────────────────────────────────────────────
 
+const SITE_URL = 'https://vaalhub.co.za';
+
+function resolveMediaUrl(url) {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('/api/')) return `${API_URL}${url}`;
+  return `${SITE_URL}${url}`;
+}
+
 function BusinessCard({ biz, onQuickView }) {
-  const logoSrc = biz.logo_url
-    ? (biz.logo_url.startsWith('http') ? biz.logo_url : `${API_URL}${biz.logo_url}`)
-    : null;
+  const logoSrc = resolveMediaUrl(biz.logo_url);
   return (
     <div
       onClick={() => onQuickView(biz)}
@@ -578,9 +585,7 @@ function BusinessCard({ biz, onQuickView }) {
 // ── Quick-view modal ──────────────────────────────────────────────────────────
 
 function BusinessModal({ biz, onClose }) {
-  const logoSrc = biz.logo_url
-    ? (biz.logo_url.startsWith('http') ? biz.logo_url : `${API_URL}${biz.logo_url}`)
-    : null;
+  const logoSrc = resolveMediaUrl(biz.logo_url);
   return (
     <Modal isOpen onClose={onClose} title={biz.business_name}>
       <div className="space-y-5">
