@@ -162,10 +162,10 @@ export default function BusinessDetail() {
   const canonicalUrl = `${SITE_URL}/businesses/${id}/${slug}`;
   const icon = CATEGORY_ICONS[business.category] || '🏢';
   const logoSrc = business.logo_url
-    ? (business.logo_url.startsWith('http') ? business.logo_url : `${SITE_URL}${business.logo_url}`)
+    ? (business.logo_url.startsWith('http') ? business.logo_url : `${API_URL}${business.logo_url}`)
     : null;
   const promoSrc = business.promo_image
-    ? (business.promo_image.startsWith('http') ? business.promo_image : `${SITE_URL}${business.promo_image}`)
+    ? (business.promo_image.startsWith('http') ? business.promo_image : `${API_URL}${business.promo_image}`)
     : null;
 
   return (

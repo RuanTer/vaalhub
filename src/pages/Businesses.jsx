@@ -472,6 +472,9 @@ export default function Businesses() {
 // ── Business card ─────────────────────────────────────────────────────────────
 
 function BusinessCard({ biz, onQuickView }) {
+  const logoSrc = biz.logo_url
+    ? (biz.logo_url.startsWith('http') ? biz.logo_url : `${API_URL}${biz.logo_url}`)
+    : null;
   return (
     <div
       onClick={() => onQuickView(biz)}
@@ -479,12 +482,12 @@ function BusinessCard({ biz, onQuickView }) {
     >
       {/* Logo area */}
       <div className="relative h-40 bg-gray-100 overflow-hidden flex-shrink-0">
-        {biz.logo_url ? (
+        {logoSrc ? (
           <>
-            <img src={biz.logo_url} aria-hidden="true"
+            <img src={logoSrc} aria-hidden="true"
               className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-40"
               onError={e => { e.target.style.display = 'none'; }} />
-            <img src={biz.logo_url} alt={biz.business_name}
+            <img src={logoSrc} alt={biz.business_name}
               className="relative z-10 w-full h-full object-contain mix-blend-multiply"
               onError={e => { e.target.style.display = 'none'; e.target.previousSibling.style.display = 'none'; }} />
           </>
@@ -575,17 +578,20 @@ function BusinessCard({ biz, onQuickView }) {
 // ── Quick-view modal ──────────────────────────────────────────────────────────
 
 function BusinessModal({ biz, onClose }) {
+  const logoSrc = biz.logo_url
+    ? (biz.logo_url.startsWith('http') ? biz.logo_url : `${API_URL}${biz.logo_url}`)
+    : null;
   return (
     <Modal isOpen onClose={onClose} title={biz.business_name}>
       <div className="space-y-5">
 
         {/* Logo */}
-        {biz.logo_url && (
+        {logoSrc && (
           <div className="relative w-full h-48 rounded-xl overflow-hidden bg-gray-100">
-            <img src={biz.logo_url} aria-hidden="true"
+            <img src={logoSrc} aria-hidden="true"
               className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-50"
               onError={e => { e.target.style.display = 'none'; }} />
-            <img src={biz.logo_url} alt={biz.business_name}
+            <img src={logoSrc} alt={biz.business_name}
               className="relative z-10 w-full h-full object-contain mix-blend-multiply"
               onError={e => { e.target.style.display = 'none'; e.target.previousSibling.style.display = 'none'; }} />
           </div>
