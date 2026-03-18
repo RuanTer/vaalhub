@@ -102,7 +102,7 @@ const Header = () => {
                   )}
                 </Link>
                 {item.submenu && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white shadow-lg rounded-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div className="py-1.5">
                       {item.submenu.map((subitem) => (
                         <Link
