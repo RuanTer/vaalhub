@@ -29,6 +29,8 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
   const [events, setEvents] = useState([]);
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bizTotal, setBizTotal] = useState(null);
+  const [topCategories, setTopCategories] = useState([]);
 
   useEffect(() => {
     async function fetchContent() {
@@ -36,7 +38,7 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
         const [newsRes, eventsRes, bizRes] = await Promise.allSettled([
           fetch(`${API_URL}/api/news?area=${townName}&limit=5`),
           fetch(`${API_URL}/api/events?location=${townName}&limit=5`),
-          fetch(`${API_URL}/api/businesses?location=${townName}&status=published&limit=5`),
+          fetch(`${API_URL}/api/businesses?location=${townName}&status=published&limit=50`),
         ]);
 
         if (newsRes.status === 'fulfilled' && newsRes.value.ok) {
@@ -50,7 +52,19 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
         if (bizRes.status === 'fulfilled' && bizRes.value.ok) {
           const data = await bizRes.value.json();
           const items = Array.isArray(data) ? data : (data.data || data.businesses || []);
+          const total = data.total || data.count || items.length;
+          setBizTotal(total);
           setBusinesses(items.slice(0, 5));
+          const catCounts = {};
+          items.forEach(b => {
+            const cat = b.category || 'Other';
+            catCounts[cat] = (catCounts[cat] || 0) + 1;
+          });
+          const sorted = Object.entries(catCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([cat]) => cat);
+          setTopCategories(sorted);
         }
       } catch {
         // Fail silently — static content still shows
@@ -110,6 +124,38 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
       {/* Dynamic content sections */}
       <div className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Business count + top categories */}
+          {bizTotal !== null && (
+            <div className="mb-6 p-4 bg-orange-50 border border-orange-100 rounded-xl">
+              <p className="text-sm text-gray-700 font-medium mb-3">
+                <span className="text-vaal-orange-600 font-bold text-lg">{bizTotal.toLocaleString()}</span>
+                {bizTotal >= 50 ? '+' : ''} businesses listed in {townName}
+              </p>
+              {topCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {topCategories.map(cat => {
+                    const catSlug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    const townSlug = townName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    return (
+                      <Link
+                        key={cat}
+                        to={`/businesses/services/${catSlug}/${townSlug}`}
+                        className="text-xs px-3 py-1.5 bg-white border border-orange-200 text-vaal-orange-600 rounded-full hover:bg-orange-50 transition-colors"
+                      >
+                        {cat} in {townName} →
+                      </Link>
+                    );
+                  })}
+                  <Link
+                    to={`/businesses?location=${encodeURIComponent(townName)}`}
+                    className="text-xs px-3 py-1.5 bg-vaal-orange-500 text-white rounded-full hover:bg-vaal-orange-600 transition-colors"
+                  >
+                    View all businesses →
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* Latest News */}
