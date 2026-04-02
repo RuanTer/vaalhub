@@ -313,7 +313,7 @@ export function buildBusinessMeta(business, overrideUrl) {
   const url = overrideUrl || `${SITE_URL}/businesses`;
 
   // Prefer the business logo; fall back to the VaalHub default banner
-  const image = absoluteUrl(business.logo_url) || DEFAULT_IMAGE;
+  const image = absoluteUrl(business.logo_url) || absoluteUrl(business.google_photo_url) || DEFAULT_IMAGE;
   const keywords = buildKeywords({ ...business, headline: name });
 
   // Collect all online profiles into sameAs (deduped, truthy only)
