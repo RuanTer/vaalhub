@@ -124,8 +124,8 @@ export default function Businesses() {
   const [selectedTag, setSelectedTag]   = useState(searchParams.get('tag') || '');
 
   const [filters, setFilters] = useState({
-    location:     '',
-    category:     '',
+    location:     searchParams.get('location') || '',
+    category:     searchParams.get('category') || '',
     search:       '',
     verifiedOnly: false,
   });

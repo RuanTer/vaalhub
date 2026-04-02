@@ -133,18 +133,15 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
               </p>
               {topCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {topCategories.map(cat => {
-                    const catSlug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-                    return (
-                      <Link
-                        key={cat}
-                        to={`/businesses/services/${catSlug}/${townSlug}`}
-                        className="text-xs px-3 py-1.5 bg-white border border-orange-200 text-vaal-orange-600 rounded-full hover:bg-orange-50 transition-colors"
-                      >
-                        {cat} in {townName} →
-                      </Link>
-                    );
-                  })}
+                  {topCategories.map(cat => (
+                    <Link
+                      key={cat}
+                      to={`/businesses?location=${encodeURIComponent(townName)}&category=${encodeURIComponent(cat)}`}
+                      className="text-xs px-3 py-1.5 bg-white border border-orange-200 text-vaal-orange-600 rounded-full hover:bg-orange-50 transition-colors"
+                    >
+                      {cat} in {townName} →
+                    </Link>
+                  ))}
                 </div>
               )}
               <Link
