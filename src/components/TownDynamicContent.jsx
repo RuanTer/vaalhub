@@ -52,12 +52,13 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
         if (bizRes.status === 'fulfilled' && bizRes.value.ok) {
           const data = await bizRes.value.json();
           const items = Array.isArray(data) ? data : (data.data || data.businesses || []);
-          const total = data.total || data.count || items.length;
+          const total = data.total ?? data.count ?? items.length;
           setBizTotal(total);
           setBusinesses(items.slice(0, 5));
           const catCounts = {};
           items.forEach(b => {
-            const cat = b.category || 'Other';
+            const cat = b.category;
+            if (!cat) return;
             catCounts[cat] = (catCounts[cat] || 0) + 1;
           });
           const sorted = Object.entries(catCounts)
@@ -128,14 +129,12 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
           {bizTotal !== null && (
             <div className="mb-6 p-4 bg-orange-50 border border-orange-100 rounded-xl">
               <p className="text-sm text-gray-700 font-medium mb-3">
-                <span className="text-vaal-orange-600 font-bold text-lg">{bizTotal.toLocaleString()}</span>
-                {bizTotal >= 50 ? '+' : ''} businesses listed in {townName}
+                <span className="text-vaal-orange-600 font-bold text-lg">{bizTotal.toLocaleString()}{bizTotal >= 50 ? '+' : ''}</span>{' '}businesses listed in {townName}
               </p>
               {topCategories.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-2">
                   {topCategories.map(cat => {
                     const catSlug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-                    const townSlug = townName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
                     return (
                       <Link
                         key={cat}
@@ -146,14 +145,14 @@ export default function TownDynamicContent({ townName, townSlug, province = 'Gau
                       </Link>
                     );
                   })}
-                  <Link
-                    to={`/businesses?location=${encodeURIComponent(townName)}`}
-                    className="text-xs px-3 py-1.5 bg-vaal-orange-500 text-white rounded-full hover:bg-vaal-orange-600 transition-colors"
-                  >
-                    View all businesses →
-                  </Link>
                 </div>
               )}
+              <Link
+                to={`/businesses?location=${encodeURIComponent(townName)}`}
+                className="text-xs px-3 py-1.5 bg-vaal-orange-500 text-white rounded-full hover:bg-vaal-orange-600 transition-colors"
+              >
+                View all businesses →
+              </Link>
             </div>
           )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
