@@ -13,6 +13,22 @@ function slugify(name = '') {
     .replace(/^-+|-+$/g, '');
 }
 
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DAYS_REGEX = new RegExp(`(${DAYS.join('|')})`, 'g');
+
+function parseHours(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  // Raw format: "Monday8 am–5 pmTuesday8 am–5 pm..."
+  const parts = raw.split(DAYS_REGEX).filter(Boolean);
+  const result = [];
+  for (let i = 0; i < parts.length - 1; i += 2) {
+    if (DAYS.includes(parts[i])) {
+      result.push({ day: parts[i], hours: parts[i + 1].trim() });
+    }
+  }
+  return result.length ? result : null;
+}
+
 const CATEGORY_ICONS = {
   Restaurant: '🍽️', Retail: '🛍️', Healthcare: '🏥', Automotive: '🚗',
   Construction: '🔨', Education: '📚', Entertainment: '🎭',
@@ -422,7 +438,24 @@ export default function BusinessDetail() {
                     </span>
                     <div>
                       <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Hours</p>
-                      <p className="text-gray-800 whitespace-pre-line">{business.operating_hours}</p>
+                      {(() => {
+                        const parsed = parseHours(business.operating_hours);
+                        if (parsed) {
+                          return (
+                            <table className="text-sm text-gray-800 border-collapse">
+                              <tbody>
+                                {parsed.map(({ day, hours }) => (
+                                  <tr key={day}>
+                                    <td className="pr-4 py-0.5 font-medium text-gray-600 w-28">{day}</td>
+                                    <td className={`py-0.5 ${hours.toLowerCase().includes('closed') ? 'text-gray-400' : ''}`}>{hours}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          );
+                        }
+                        return <p className="text-gray-800 whitespace-pre-line">{business.operating_hours}</p>;
+                      })()}
                     </div>
                   </li>
                 )}
