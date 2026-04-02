@@ -14,6 +14,10 @@ const categories = ['Restaurant', 'Retail', 'Service', 'Healthcare', 'Entertainm
 
 // ── tiny helpers ─────────────────────────────────────────────────────────────
 
+function slugify(name = '') {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
 function StarRow({ rating, count }) {
   return (
     <div className="flex items-center gap-1.5">
@@ -567,7 +571,7 @@ function BusinessCard({ biz, onQuickView }) {
             Quick View
           </button>
           <Link
-            to={`/businesses/${biz.business_id}`}
+            to={`/businesses/${biz.business_id}/${slugify(biz.business_name || biz.name || '')}`}
             onClick={e => e.stopPropagation()}
             className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-vaal-orange-500 hover:bg-vaal-orange-600 text-white text-xs font-semibold rounded-lg transition-colors"
           >
@@ -724,7 +728,7 @@ function BusinessModal({ biz, onClose }) {
           )}
 
           <Link
-            to={`/businesses/${biz.business_id}`}
+            to={`/businesses/${biz.business_id}/${slugify(biz.business_name || biz.name || '')}`}
             className="flex items-center gap-1 text-xs text-gray-400 hover:text-vaal-orange-600 transition-colors flex-shrink-0"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
