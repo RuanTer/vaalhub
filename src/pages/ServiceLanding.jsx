@@ -67,11 +67,16 @@ const SERVICE_PAGES = [
 ];
 
 const LOCATIONS = [
-  { slug: 'vereeniging', label: 'Vereeniging', region: 'Gauteng' },
-  { slug: 'vanderbijlpark', label: 'Vanderbijlpark', region: 'Gauteng' },
-  { slug: 'meyerton', label: 'Meyerton', region: 'Gauteng' },
-  { slug: 'sasolburg', label: 'Sasolburg', region: 'Free State' },
-  { slug: 'sharpeville', label: 'Sharpeville', region: 'Gauteng' },
+  { slug: 'vereeniging',    label: 'Vereeniging',    region: 'Gauteng'    },
+  { slug: 'vanderbijlpark', label: 'Vanderbijlpark',  region: 'Gauteng'    },
+  { slug: 'meyerton',       label: 'Meyerton',        region: 'Gauteng'    },
+  { slug: 'sasolburg',      label: 'Sasolburg',       region: 'Free State' },
+  { slug: 'sebokeng',       label: 'Sebokeng',        region: 'Gauteng'    },
+  { slug: 'evaton',         label: 'Evaton',          region: 'Gauteng'    },
+  { slug: 'heidelberg',     label: 'Heidelberg',      region: 'Gauteng'    },
+  { slug: 'sharpeville',    label: 'Sharpeville',     region: 'Gauteng'    },
+  { slug: 'walkerville',    label: 'Walkerville',     region: 'Gauteng'    },
+  { slug: 'three-rivers',   label: 'Three Rivers',    region: 'Gauteng'    },
 ];
 
 const SERVICE_MAP = Object.fromEntries(SERVICE_PAGES.map(s => [s.slug, s]));
@@ -148,7 +153,14 @@ export default function ServiceLanding() {
       const res = await fetch(`${API_URL}/api/businesses?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
-      setBusinesses(data.data || []);
+      const raw = Array.isArray(data) ? data : (data.data || data.businesses || []);
+      const sorted = [...raw].sort((a, b) => {
+        const aPhoto = a.google_photo_url ? 0 : 1;
+        const bPhoto = b.google_photo_url ? 0 : 1;
+        if (aPhoto !== bPhoto) return aPhoto - bPhoto;
+        return (b.google_rating || 0) - (a.google_rating || 0);
+      });
+      setBusinesses(sorted);
     } catch (err) {
       console.error(err);
       setError('Unable to load businesses. Please try again later.');
