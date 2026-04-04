@@ -485,7 +485,7 @@ function resolveMediaUrl(url) {
 }
 
 function BusinessCard({ biz, onQuickView }) {
-  const logoSrc = resolveMediaUrl(biz.logo_url);
+  const logoSrc = resolveMediaUrl(biz.logo_url || biz.google_photo_url);
   return (
     <div
       onClick={() => onQuickView(biz)}
@@ -591,7 +591,7 @@ function BusinessCard({ biz, onQuickView }) {
 // ── Quick-view modal ──────────────────────────────────────────────────────────
 
 function BusinessModal({ biz, onClose }) {
-  const logoSrc = resolveMediaUrl(biz.logo_url);
+  const logoSrc = resolveMediaUrl(biz.logo_url || biz.google_photo_url);
   return (
     <Modal isOpen onClose={onClose} title={biz.business_name}>
       <div className="space-y-5">
